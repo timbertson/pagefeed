@@ -38,4 +38,4 @@ class Page(Model):
 	@classmethod
 	def find(cls, owner, url):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
-		
+	
