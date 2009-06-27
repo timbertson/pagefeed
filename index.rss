@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+	<channel>
+		<title>saved feeds for {{user|escape}}</title>
+		<description>pagefeed RSS for user {{user|escape}}</description>
+		<link>{{uri|escape}}</link>
+
+		{% for page in pages %}
+			<item>
+			<title>pagefeed saved item</title>
+			<link>{{page.url}}</link>
+			<description>
+				<![CDATA[{{ page.content|escape }}]]>
+			</description>
+			<guid isPermaLink="true">{{page.key|escape}}</guid>
+			<pubDate>{{ page.date|escape }}</pubDate>
+			</item>
+		{% endfor %}
+
+	</channel>
+</rss>
