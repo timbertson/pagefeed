@@ -2,19 +2,40 @@ from google.appengine.ext import db
 from google.appengine.ext.db import Model
 from google.appengine.api.urlfetch import fetch, DownloadError
 
+import re
+
 class Page(Model):
-	url = db.URLProperty()
+	url = db.URLProperty(required=True)
 	content = db.TextProperty()
+	title = db.StringProperty()
 	error = db.BooleanProperty()
-	owner = db.UserProperty()
+	owner = db.UserProperty(required=True)
 	date = db.DateTimeProperty(auto_now_add=True)
+	
+	@staticmethod
+	def _get_title(content):
+		match = re.compile(r'<title>([^<]+)</title>', re.DOTALL)
+		matched = match.search(content)
+		if matched:
+			return matched.group(1)
+		return '[pagefeed saved item]'
+	
+	@staticmethod
+	def _get_body(content):
+		match = re.compile(r'<body(?: [^>]*)?>(.*)</body>', re.DOTALL)
+		matched = match.search(content)
+		if matched:
+			return matched.group(1)
+		return content
 	
 	def fetch(self):
 		try:
 			response = fetch(self.url)
 			if response.status_code >= 400:
 				raise DownloadError("status code %s\n%s" % (response.status_code, response.content))
-			self.content = response.content
+			content = response.content.decode('UTF-8')
+			self.content = self._get_body(content)
+			self.title = self._get_title(content)
 			self.error = False
 		except DownloadError, e:
 			self.error = True
@@ -38,4 +59,31 @@ class Page(Model):
 	@classmethod
 	def find(cls, owner, url):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
+
+class UserID(Model):
+	user = db
+	email = db.EmailProperty(required=True)
+	handle = db.IntegerProperty(required=True)
 	
+	@staticmethod
+	def _new_handle(email):
+		import time
+		import random
+		random.seed((time.clock() * (1 << 32)) + hash(email))
+		return random.getrandbits(64)
+	
+	@classmethod
+	def get(cls, email):
+		user = db.Query(cls).filter('email =', email).get()
+		if not user:
+			handle = cls._new_handle(email)
+			user = cls(email=email, handle=handle)
+			user.put()
+		return user
+
+	@classmethod
+	def auth(cls, email, handle):
+		user = db.Query(cls).filter('email =', email).filter('handle =', handle).get()
+		return user is not None
+
+
