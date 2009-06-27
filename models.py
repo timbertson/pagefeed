@@ -70,7 +70,7 @@ class UserID(Model):
 		import time
 		import random
 		random.seed((time.clock() * (1 << 32)) + hash(email))
-		return random.getrandbits(64)
+		return random.getrandbits(60)
 	
 	@classmethod
 	def get(cls, email):

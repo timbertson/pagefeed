@@ -11,7 +11,7 @@
 			<title>{{page.title|escape}}</title>
 			<link>{{page.url}}</link>
 			<description>
-				<![CDATA[{{ page.content|escape }}]]>
+				{{ page.content|escape }}
 			</description>
 			<guid isPermaLink="true">{{page.key|escape}}</guid>
 			<pubDate>{{ page.date|escape }}</pubDate>
