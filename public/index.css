@@ -18,7 +18,7 @@ a {
 
 a:visited { color:#868; }
 a:hover { color:#59f; }
-
+a.fresh:visited { color: #25d }
 
 .flush {
 	padding: 0 20px;
@@ -38,8 +38,9 @@ dl {
 }
 
 dl form {
-	float:right;
 	display:inline;
+	position:relative;
+	bottom:0.1em;
 }
 
 dl dt {
@@ -54,6 +55,9 @@ dl dd {
 	margin:0;
 	padding: 4px 1em;
 	margin-bottom:0.5em;
+	white-space:nowrap;
+	overflow:hidden;
+	max-width:500px;
 }
 
 .footer {

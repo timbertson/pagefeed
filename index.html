@@ -6,8 +6,8 @@
 	
 	<body>
 		<div class="header flush">
-			<h1>Welcome, {{name|escape}} <a href="{{logout|escape}}">(logout)</a></h1>
-			<p><a href="{{feed_link|escape}}">Click here for your custom feed</a>
+			<h1>Welcome, {{name|escape}} <a href="{{logout|escape}}" class="fresh">(logout)</a></h1>
+			<p><a href="{{feed_link|escape}}" class="fresh">Click here for your custom feed</a>
 				(but don't tell anyone else this link, it's private)
 			</p>
 		
@@ -32,7 +32,7 @@
 						<dd>{{page.url|escape}}</dd>
 					{% endfor %}
 				{% else %}
-					<p>Nothing here!</p>
+					<p>No links saved ... (yet!)</p>
 				{% endif %}
 			</dl>
 		</div>
