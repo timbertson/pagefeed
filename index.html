@@ -5,28 +5,38 @@
 	</head>
 	
 	<body>
-		<h1>Welcome, {{name|escape}}</h1>
-		<p><a href="{{feed_link|escape}}">Click here for your custom feed</a>
-			(but don't tell anyone else this link, it's your private one)
-		</p>
+		<div class="header flush">
+			<h1>Welcome, {{name|escape}} <a href="{{logout|escape}}">(logout)</a></h1>
+			<p><a href="{{feed_link|escape}}">Click here for your custom feed</a>
+				(but don't tell anyone else this link, it's private)
+			</p>
 		
-		<form action="/page/" method="POST">
-			<input type="text" size="60" name="url" id="url" />
-			<input type="submit" value="add link" />
-		</form>
+			<form action="/page/" method="POST" class="add_url">
+				<input type="text" size="60" name="url" id="url" />
+				<input type="submit" value="add link" />
+			</form>
+		</div>
+
+		<div class="links flush">
+			<h2>Your current links:</h2>
+			<dl>
+				{% if pages %}
+					{% for page in pages %}
+						<dt>
+							<form action="/page/del/" method="POST" class="del">
+								<input type="hidden" name="url" value="{{page.url|escape}}" />
+								<input type="submit" value="x" />
+							</form>
+							<a href="{{page.url|escape}}">{{page.title|escape}}</a>
+						</dt>
+						<dd>{{page.url|escape}}</dd>
+					{% endfor %}
+				{% else %}
+					<p>Nothing here!</p>
+				{% endif %}
+			</dl>
+		</div>
 		
-		<hr />
-		<h2>Your current links:</h2>
-		<dl>
-			{% for page in pages %}
-				<dt>
-					<form action="/page/del/" method="POST" class="del">
-						<input type="hidden" name="url" value="{{page.url|escape}}" />
-						<input type="submit" value="x" />
-					</form>
-					<a href="{{page.url|escape}}">{{page.title|escape}}</a>
-				</dt>
-				<dd>{{page.url|escape}}</dd>
-			{% endfor %}
+		<div class="footer flush">Brought to you by <a href="http://gfxmonk.net">gfxmonk</a></div>
 	</body>
 </html>

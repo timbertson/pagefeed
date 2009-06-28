@@ -15,11 +15,18 @@ class HttpError(Exception):
 		self.code = code
 		self.content = ''
 
+class RedirectError(Exception):
+	def __init__(self, target):
+		self.target = target
+
 class BaseHandler(webapp.RequestHandler):
 	def handle_exception(self, exc, *a, **k):
 		if isinstance(exc, HttpError):
 			self.error(exc.code)
 			self.response.out.write(exc.content)
+			return
+		if isinstance(exc, RedirectError):
+			self.redirect(exc.target)
 			return
 		webapp.RequestHandler.handle_exception(self, exc, *a, **k)
 		
@@ -28,7 +35,7 @@ class BaseHandler(webapp.RequestHandler):
 		if user:
 			return user
 		else:
-			self.redirect(users.create_login_url(self.request.uri))
+			raise RedirectError(users.create_login_url(self.request.uri))
 		
 	def url(self):
 		url = self.request.get('url')
@@ -36,18 +43,22 @@ class BaseHandler(webapp.RequestHandler):
 			return url
 		raise HttpError(400)
 	
+	def uri(self):
+		return self.request.uri.split('?')[0]
+	
 
 class MainHandler(BaseHandler):
 	def get(self):
 		user = self.user()
 		email = user.email()
 		user_handle = UserID.get(email).handle
-		uri = self.request.uri + 'feed/%s-%s/' % (user_handle, urllib.quote(email))
+		uri = self.uri() + 'feed/%s-%s/' % (user_handle, urllib.quote(email))
 		
 		template_values = {
 			'name': user.nickname(),
 			'pages': Page.find_all(user),
 			'feed_link': uri,
+			'logout': users.create_logout_url('/'),
 		}
 		path = os.path.join(os.path.dirname(__file__), 'index.html')
 		self.response.out.write(template.render(path, template_values))
@@ -64,7 +75,7 @@ class FeedHandler(BaseHandler):
 		template_values = {
 			'user': email,
 			'pages': Page.find_all(user),
-			'uri': self.request.uri,
+			'uri': self.uri(),
 		}
 		path = os.path.join(os.path.dirname(__file__), 'feed.rss')
 		self.response.out.write(template.render(path, template_values))
