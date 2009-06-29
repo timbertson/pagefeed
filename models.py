@@ -3,6 +3,14 @@ from google.appengine.ext.db import Model
 from google.appengine.api.urlfetch import fetch, DownloadError
 
 import re
+import htmllib
+
+def unescape_html(s):
+	p = htmllib.HTMLParser(None)
+	p.save_bgn()
+	p.feed(s)
+	return p.save_end()
+
 
 class Page(Model):
 	url = db.URLProperty(required=True)
@@ -17,7 +25,7 @@ class Page(Model):
 		match = re.compile(r'<title>([^<]+)</title>', re.DOTALL)
 		matched = match.search(content)
 		if matched:
-			return matched.group(1)
+			return unescape_html(matched.group(1))
 		return '[pagefeed saved item]'
 	
 	@staticmethod
