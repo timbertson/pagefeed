@@ -2,15 +2,9 @@ from google.appengine.ext import db
 from google.appengine.ext.db import Model
 from google.appengine.api.urlfetch import fetch, DownloadError
 
-import re
-import htmllib
+from lib.BeautifulSoup import BeautifulSoup, HTMLParseError
 
-def unescape_html(s):
-	p = htmllib.HTMLParser(None)
-	p.save_bgn()
-	p.feed(s)
-	return p.save_end()
-
+DEFAULT_TITLE = '[pagefeed saved item]'
 
 class Page(Model):
 	url = db.URLProperty(required=True)
@@ -21,29 +15,28 @@ class Page(Model):
 	date = db.DateTimeProperty(auto_now_add=True)
 	
 	@staticmethod
-	def _get_title(content):
-		match = re.compile(r'<title>([^<]+)</title>', re.DOTALL)
-		matched = match.search(content)
-		if matched:
-			return unescape_html(matched.group(1))
-		return '[pagefeed saved item]'
+	def _get_title(soup):
+		return unicode(soup.title.string or DEFAULT_TITLE)
 	
 	@staticmethod
-	def _get_body(content):
-		match = re.compile(r'<body(?: [^>]*)?>(.*)</body>', re.DOTALL)
-		matched = match.search(content)
-		if matched:
-			return matched.group(1)
-		return content
+	def _get_body(soup):
+		return unicode(soup.body or soup)
+	
+	def _populate_content(self, raw_content):
+		try:
+			soup = BeautifulSoup(raw_content)
+			self.content = self._get_body(soup)
+			self.title = self._get_title(soup)
+		except HTMLParseError:
+			self.content = raw_content.decode('UTF-8') # make a mad guess
+			self.title = DEFAULT_TITLE
 	
 	def fetch(self):
 		try:
 			response = fetch(self.url)
 			if response.status_code >= 400:
 				raise DownloadError("status code %s\n%s" % (response.status_code, response.content))
-			content = response.content.decode('UTF-8')
-			self.content = self._get_body(content)
-			self.title = self._get_title(content)
+			self._populate_content(response.content)
 			self.error = False
 		except DownloadError, e:
 			self.error = True
