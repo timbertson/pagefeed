@@ -65,7 +65,7 @@ class MainHandler(BaseHandler):
 
 class FeedHandler(BaseHandler):
 	# note: doesn't require a logged-in user()
-	# authentication is handled by the secret (but uninportant) user handle
+	# authentication is handled by the secret (but non-sensitive) user handle
 	# in addition to email address
 	def get(self, handle, email):
 		email = urllib.unquote(email)
@@ -73,7 +73,7 @@ class FeedHandler(BaseHandler):
 			raise HttpError(403, "invalid credentials... ")
 		user = users.User(email)
 		template_values = {
-			'user': email,
+			'user': user.nickname(),
 			'pages': Page.find_all(user),
 			'uri': self.uri(),
 		}
