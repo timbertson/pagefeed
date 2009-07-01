@@ -28,7 +28,7 @@ class Page(Model):
 			self.content = self._get_body(soup)
 			self.title = self._get_title(soup)
 		except HTMLParseError, e:
-			self.content = "Sorry, pagefeed was unable to parse the page content"
+			self.content = "unable to parse page content: %s" % (e.message, )
 			self.title = DEFAULT_TITLE
 			self.error = True
 	
@@ -36,7 +36,7 @@ class Page(Model):
 		try:
 			response = fetch(self.url)
 			if response.status_code >= 400:
-				raise DownloadError("status code %s\n%s" % (response.status_code, response.content))
+				raise DownloadError("request returned status code %s\n%s" % (response.status_code, response.content))
 			self.error = False
 			self._populate_content(response.content)
 		except DownloadError, e:

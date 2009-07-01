@@ -87,16 +87,25 @@ class FeedHandler(BaseHandler):
 		self.response.out.write(template.render(path('feed.rss'), template_values))
 
 class PageHandler(BaseHandler):
-	def _add(self, user, url):
-		existing = Page.find(user, url)
-		if existing is None:
-			Page(owner=self.user(), url=url).put()
-			return True
-		return False
+	def _add(self, user, url, success = None):
+		page = Page.find(user, url)
+		if page is None:
+			page = Page(owner=self.user(), url=url)
+			page.put()
+		else:
+			page.update()
+		if page.error:
+			self._render_error(page)
+		else:
+			if success is not None:
+				success(page)
+		return page
+	
+	def _render_error(self, page):
+		self.response.out.write(template.render(path('error.html'), {'page':page}))
 
 	def post(self):
-		self._add(self.user(), self.url())
-		self.redirect('/')
+		page = self._add(self.user(), self.url(), success = lambda x: self.redirect('/'))
 
 	def delete(self):
 		page = Page.find(owner=self.user(), url=self.url())
@@ -109,8 +118,10 @@ class PageHandler(BaseHandler):
 
 class PageBookmarkletHandler(PageHandler):
 	def get(self):
-		self._add(self.user(), self.url())
-		self.response.out.write(template.render(path('bookmarklet.html'), {}))
+		def success(page):
+			self.response.out.write(template.render(path('bookmarklet.html'), {}))
+		self._add(self.user(), self.url(), success=success)
+	
 
 class PageDeleteHandler(PageHandler):
 	# alias for DELETE on PageHandler
