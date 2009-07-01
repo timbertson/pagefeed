@@ -8,7 +8,11 @@ from google.appengine.ext.webapp import template
 import os
 import urllib
 import cgi
+import urllib2
 from models import Page, UserID
+
+def path(*parts):
+	return os.path.join(os.path.dirname(__file__), *parts)
 
 class HttpError(Exception):
 	def __init__(self, code, content=''):
@@ -54,14 +58,17 @@ class MainHandler(BaseHandler):
 		user_handle = UserID.get(email).handle
 		uri = self.uri() + 'feed/%s-%s/' % (user_handle, urllib.quote(email))
 		
+		bookmarklet_js = template.render(path('bookmarklet.js'), {'host':self.uri().split('/')[2]})
+		bookmarklet_js.replace('\n', ' ')
 		template_values = {
 			'name': user.nickname(),
 			'pages': Page.find_all(user),
 			'feed_link': uri,
 			'logout': users.create_logout_url('/'),
+			'bookmarklet': urllib2.quote(bookmarklet_js)
 		}
-		path = os.path.join(os.path.dirname(__file__), 'index.html')
-		self.response.out.write(template.render(path, template_values))
+		
+		self.response.out.write(template.render(path('index.html'), template_values))
 
 class FeedHandler(BaseHandler):
 	# note: doesn't require a logged-in user()
@@ -77,8 +84,7 @@ class FeedHandler(BaseHandler):
 			'pages': Page.find_all(user),
 			'uri': self.uri(),
 		}
-		path = os.path.join(os.path.dirname(__file__), 'feed.rss')
-		self.response.out.write(template.render(path, template_values))
+		self.response.out.write(template.render(path('feed.rss'), template_values))
 
 class PageHandler(BaseHandler):
 	def _add(self, user, url):
@@ -101,6 +107,11 @@ class PageHandler(BaseHandler):
 		else:
 			raise HttpError(404, "could not find saved page: %s" % (cgi.escape(self.url(),)))
 
+class PageBookmarkletHandler(PageHandler):
+	def get(self):
+		self._add(self.user(), self.url())
+		self.response.out.write(template.render(path('bookmarklet.html'), {}))
+
 class PageDeleteHandler(PageHandler):
 	# alias for DELETE on PageHandler
 	get = post = PageHandler.delete
@@ -109,6 +120,7 @@ def main():
 	application = webapp.WSGIApplication([
 		('/', MainHandler),
 		('/page/', PageHandler),
+		('/page/bookmarklet/', PageBookmarkletHandler),
 		('/page/del/', PageDeleteHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
 		], debug=True)
