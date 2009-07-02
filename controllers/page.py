@@ -1,14 +1,7 @@
 import cgi
 
-from google.appengine.ext.webapp import template
-
-from models import Page, UserID
-from base import BaseHandler
-from helpers import view
-from errors import HttpError
-
-import logging
-from logging import debug, info
+from base import *
+from models import Page
 
 class PageHandler(BaseHandler):
 	def _add(self, user, url, success = None):

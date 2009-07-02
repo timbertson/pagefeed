@@ -10,6 +10,9 @@ DEFAULT_TITLE = '[pagefeed saved item]'
 
 from helpers import view
 
+class Unparseable(ValueError):
+	pass
+
 class Page(db.Model):
 	url = db.URLProperty(required=True)
 	content = db.TextProperty()
@@ -75,4 +78,6 @@ class Page(db.Model):
 	def as_html(self):
 		return template.render(view('page.html'), {'content':self.content, 'error': self.error is not None})
 	html = property(as_html)
+	
+	#todo: "host" and "soup" attributes (derived)
 

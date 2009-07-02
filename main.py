@@ -14,6 +14,7 @@ def main():
 		('/page/', PageHandler),
 		('/page/bookmarklet/', PageBookmarkletHandler),
 		('/page/del/', PageDeleteHandler),
+		# ('/transform/', TransformHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
 		], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)

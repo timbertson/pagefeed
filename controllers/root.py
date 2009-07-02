@@ -1,15 +1,7 @@
-from google.appengine.ext import webapp
-from google.appengine.api import users
-from google.appengine.ext.webapp import template
-
 import urllib2
+
+from base import *
 from models import Page, UserID
-
-from base import BaseHandler
-from helpers import view
-
-import logging
-from logging import debug, info
 
 class MainHandler(BaseHandler):
 	def get(self):
