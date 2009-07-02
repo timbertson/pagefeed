@@ -18,7 +18,7 @@ class PageHandler(BaseHandler):
 			page.put()
 		else:
 			page.update()
-		if page.error:
+		if page.error is not None:
 			self._render_error(page)
 		else:
 			if success is not None:
