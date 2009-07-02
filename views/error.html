@@ -1,0 +1,13 @@
+<html>
+<head>
+	<title>PageFeed: error</title>
+</head>
+
+<body>
+	<h1>Oops!</h1>
+	<h4>PageFeed could not understand the contents of <a href="{{page.url|escape}}">{{page.url|escape}}</a>: {{page.error|encode}}</h4>
+	<p>
+		note: the page link (and whatever content was downloaded) was still saved in your RSS feed for later reference
+	</p>
+</body>
+</html>

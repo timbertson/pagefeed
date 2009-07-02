@@ -1,16 +1,20 @@
 from google.appengine.ext import db
-from google.appengine.ext.db import Model
+
 from google.appengine.api.urlfetch import fetch, DownloadError
+from google.appengine.ext.webapp import template
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError
+from logging import debug, info, warning
 
 DEFAULT_TITLE = '[pagefeed saved item]'
 
-class Page(Model):
+from helpers import view
+
+class Page(db.Model):
 	url = db.URLProperty(required=True)
 	content = db.TextProperty()
 	title = db.StringProperty()
-	error = db.BooleanProperty()
+	error = db.TextProperty()
 	owner = db.UserProperty(required=True)
 	date = db.DateTimeProperty(auto_now_add=True)
 	
@@ -23,34 +27,40 @@ class Page(Model):
 		return unicode(soup.body or soup)
 	
 	def _populate_content(self, raw_content):
+		self.error = None
 		try:
 			soup = BeautifulSoup(raw_content)
 			self.content = self._get_body(soup)
 			self.title = self._get_title(soup)
 		except HTMLParseError, e:
-			self.content = "unable to parse page content: %s" % (e.message, )
-			self.title = DEFAULT_TITLE
-			self.error = True
+			safe_content = raw_content.decode('ascii', 'ignore')
+			self._failed(e.message, safe_content)
 	
 	def fetch(self):
 		try:
 			response = fetch(self.url)
 			if response.status_code >= 400:
 				raise DownloadError("request returned status code %s\n%s" % (response.status_code, response.content))
-			self.error = False
 			self._populate_content(response.content)
 		except DownloadError, e:
-			self.error = True
-			self.content = e.message
+			self._failed(e.message, 'no content was downloaded')
+	
+	def _failed(self, error, content=''):
+		debug("error: %s" % (error,))
+		self.title = DEFAULT_TITLE
+		self.error = error
+		self.content = content
 	
 	def update(self):
-		if self.error:
+		if self.error is not None:
+			info("page %s had an error - redownloading...." % (self.url,))
 			self.fetch()
-			if not self.error:
-				self.save()
+			self.save()
+			if self.error is None:
+				info("page %s retrieved successfully!" % (self.url,))
 	
 	def put(self, *a, **k):
-		if not self.content:
+		if self.content is None:
 			self.fetch()
 		super(type(self), self).put(*a,**k)
 
@@ -61,31 +71,8 @@ class Page(Model):
 	@classmethod
 	def find(cls, owner, url):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
-
-class UserID(Model):
-	user = db
-	email = db.EmailProperty(required=True)
-	handle = db.IntegerProperty(required=True)
 	
-	@staticmethod
-	def _new_handle(email):
-		import time
-		import random
-		random.seed((time.clock() * (1 << 32)) + hash(email))
-		return random.getrandbits(60)
-	
-	@classmethod
-	def get(cls, email):
-		user = db.Query(cls).filter('email =', email).get()
-		if not user:
-			handle = cls._new_handle(email)
-			user = cls(email=email, handle=handle)
-			user.put()
-		return user
-
-	@classmethod
-	def auth(cls, email, handle):
-		user = db.Query(cls).filter('email =', email).filter('handle =', handle).get()
-		return user is not None
-
+	def as_html(self):
+		return template.render(view('page.html'), {'content':self.content, 'error': self.error is not None})
+	html = property(as_html)
 
