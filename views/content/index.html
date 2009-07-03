@@ -1,0 +1,17 @@
+<h2>Your current links:</h2>
+<dl>
+	{% if pages %}
+		{% for page in pages %}
+			<dt>
+				<form action="/page/del/" method="POST" class="del">
+					<input type="hidden" name="url" value="{{page.url|escape}}" />
+					<input type="submit" value="x" />
+				</form>
+				<a href="{{page.url|escape}}">{{page.title|escape}}</a>
+			</dt>
+			<dd>{{page.url|escape}}</dd>
+		{% endfor %}
+	{% else %}
+		<p>No links saved ... (yet!)</p>
+	{% endif %}
+</dl>

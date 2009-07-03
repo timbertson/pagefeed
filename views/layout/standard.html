@@ -1,0 +1,18 @@
+<html>
+	<head>
+		<title>Pagefeed{% if title %}: {{title|escape}}{% endif %}</title>
+		<link rel="stylesheet" href="/public/index.css" />
+	</head>
+	
+	<body>
+		<div class="header flush">
+			{{header}}
+		</div>
+
+		<div class="content flush">
+			{{content}}
+		</div>
+		
+		<div class="footer flush">Brought to you by <a href="http://gfxmonk.net">gfxmonk</a></div>
+	</body>
+</html>

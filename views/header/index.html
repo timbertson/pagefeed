@@ -1,0 +1,15 @@
+<h1>Welcome, {{name|escape}} <a href="{{logout|escape}}" class="fresh">(logout)</a></h1>
+
+<p><a href="{{feed_link|escape}}" class="fresh">Click here for your custom feed</a>
+	(but don't tell anyone else this link, it's private)
+</p>
+
+<p>
+	Also of use is the bookmarklet:
+	<a href="javascript:{{bookmarklet|escape}}" class="fresh">pagefeed</a> (drag it somewhere and click it later!)
+</p>
+
+<form action="/page/" method="POST" class="add_url">
+	<input type="text" size="60" name="url" id="url" />
+	<input type="submit" value="add link" />
+</form>
