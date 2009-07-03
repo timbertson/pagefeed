@@ -4,7 +4,7 @@ from google.appengine.api import users
 from errors import HttpError, RedirectError
 
 import logging
-from logging import debug, info
+from logging import debug, info, error
 from helpers import view, render, render_page, host
 
 class BaseHandler(webapp.RequestHandler):

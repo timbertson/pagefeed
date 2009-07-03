@@ -9,9 +9,13 @@ from logging import debug, info, warning
 DEFAULT_TITLE = '[pagefeed saved item]'
 
 from helpers import view
+import re
 
 class Unparseable(ValueError):
 	pass
+
+def ascii(s):
+	return s.encode('ascii', 'ignore')
 
 class Page(db.Model):
 	url = db.URLProperty(required=True)
@@ -28,17 +32,39 @@ class Page(db.Model):
 	@staticmethod
 	def _get_body(soup):
 		return unicode(soup.body or soup)
+
+	@staticmethod
+	def _remove_script_tags(content):
+		script_re = re.compile(
+			'<script.*?</script[^>]*>',
+			re.MULTILINE | re.IGNORECASE)
+		return script_re.sub('', content)
 	
 	def _populate_content(self, raw_content):
 		self.error = None
 		try:
-			soup = BeautifulSoup(raw_content)
+			soup = self._parse_content(raw_content)
 			self.content = self._get_body(soup)
 			self.title = self._get_title(soup)
-		except HTMLParseError, e:
-			safe_content = raw_content.decode('ascii', 'ignore')
+		except Unparseable, e:
+			safe_content = ascii(raw_content)
 			self._failed(e.message, safe_content)
 	
+	@classmethod
+	def _parse_content(cls, content):
+		try:
+			return BeautifulSoup(raw_content)
+		except HTMLParseError, e:
+			error("initial parsing failed: %s" % (e.message,))
+			original_msg = e.message
+			safe_content = ascii(raw_content)
+			try:
+				return BeautifulSoup(cls._remove_script_tags(safe_content))
+			except HTMLParseError, e:
+				error("failsafe parsing also failed: %s" % (e.message,))
+				raise Unparseable(original_msg)
+			
+
 	def fetch(self):
 		try:
 			response = fetch(self.url)
