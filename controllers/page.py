@@ -19,7 +19,7 @@ class PageHandler(BaseHandler):
 		return page
 	
 	def _render_error(self, page):
-		self.response.out.write(template.render(view('error.html'), {'page':page}))
+		self.response.out.write(render_page('error', {'page':page, 'title':'error'},))
 
 	def post(self):
 		page = self._add(self.user(), self.url(), success = lambda x: self.redirect('/'))
@@ -36,7 +36,7 @@ class PageHandler(BaseHandler):
 class PageBookmarkletHandler(PageHandler):
 	def get(self):
 		def success(page):
-			self.response.out.write(template.render(view('bookmarklet.html'), {}))
+			self.response.out.write(render('bookmarklet.html', {}))
 		self._add(self.user(), self.url(), success=success)
 	
 

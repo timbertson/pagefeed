@@ -1,7 +1,7 @@
 from google.appengine.ext import db
 
 from google.appengine.api.urlfetch import fetch, DownloadError
-from google.appengine.ext.webapp import template
+from controllers.helpers import render
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError
 from logging import debug, info, warning
@@ -76,7 +76,7 @@ class Page(db.Model):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
 	
 	def as_html(self):
-		return template.render(view('page.html'), {'content':self.content, 'error': self.error is not None})
+		return render('page.html', {'content':self.content, 'error': self.error is not None})
 	html = property(as_html)
 	
 	#todo: "host" and "soup" attributes (derived)

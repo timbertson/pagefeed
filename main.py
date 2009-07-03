@@ -3,7 +3,6 @@
 import wsgiref.handlers
 from google.appengine.ext import webapp
 from google.appengine.api import users
-from google.appengine.ext.webapp import template
 
 from controllers import *
 

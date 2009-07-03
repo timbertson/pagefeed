@@ -1,4 +1,5 @@
 from os import path
+import logging
 from google.appengine.ext.webapp import template
 
 CONTENT = 'content'
@@ -7,6 +8,14 @@ LAYOUT = 'layout'
 
 def view(*parts):
 	return path.join(os.path.dirname(__file__), 'views', *parts)
+
+def host(url):
+	try:
+		return url.split('/')[2]
+	except IndexError:
+		logging.error("could not extract host from URL: %r" % (url,))
+		return None
+
 
 def render(*args):
 	"""render(dir, [dir, [ ... ]], values)"""
@@ -22,13 +31,13 @@ def _render_if_exists(path, values):
 		return template.render(path, values)
 	else return ''
 
-def render_page(name, values, title = None, layout='standard.html', partial=False)
+def render_page(name, values, layout='standard.html', partial=False)
 	if partial:
 		return render(CONTENT, name + '.html', values)
 	header  = _render_if_exists(view(HEADER, name + '.html'), values)
 	content = _render_if_exists(view(CONTENT, name + '.html'), values)
 	layout_values = dict(
-		title = title,
+		title = values.get('title', None),
 		header = header,
 		content = content)
 	return render(LAYOUT, layout, layout_values)

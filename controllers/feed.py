@@ -19,4 +19,5 @@ class FeedHandler(BaseHandler):
 			'uri': self.uri(),
 		}
 		debug("template values: %r" % (template_values,))
-		self.response.out.write(template.render(view('feed.rss'), template_values))
+		self.response.out.write(render('feed.rss', template_values))
+
