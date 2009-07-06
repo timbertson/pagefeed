@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import logging
 import wsgiref.handlers
 from google.appengine.ext import webapp
 from google.appengine.api import users

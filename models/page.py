@@ -1,10 +1,10 @@
 from google.appengine.ext import db
 
 from google.appengine.api.urlfetch import fetch, DownloadError
-from controllers.helpers import render
+from helpers import render
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError
-from logging import debug, info, warning
+from logging import debug, info, warning, error
 
 DEFAULT_TITLE = '[pagefeed saved item]'
 
@@ -15,7 +15,7 @@ class Unparseable(ValueError):
 	pass
 
 def ascii(s):
-	return s.encode('ascii', 'ignore')
+	return s.decode('ascii', 'ignore')
 
 class Page(db.Model):
 	url = db.URLProperty(required=True)
@@ -51,7 +51,7 @@ class Page(db.Model):
 			self._failed(e.message, safe_content)
 	
 	@classmethod
-	def _parse_content(cls, content):
+	def _parse_content(cls, raw_content):
 		try:
 			return BeautifulSoup(raw_content)
 		except HTMLParseError, e:
