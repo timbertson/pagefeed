@@ -13,7 +13,7 @@
 			<description>
 				{{ page.html|escape }}
 			</description>
-			<guid isPermaLink="true">{{page.key|escape}}</guid>
+			<guid isPermaLink="false">{{page.url|escape}}?{{page.key|escape}}</guid>
 			<pubDate>{{ page.date|escape }}</pubDate>
 			</item>
 		{% endfor %}
