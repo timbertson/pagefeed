@@ -1,7 +1,7 @@
 from google.appengine.ext import webapp
 from google.appengine.api import users
 
-from errors import HttpError, RedirectError
+from server_errors import HttpError, RedirectError
 
 import logging
 from logging import debug, info, error
