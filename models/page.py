@@ -1,14 +1,13 @@
 from google.appengine.ext import db
 
 from google.appengine.api.urlfetch import fetch, DownloadError
-from helpers import render
+from pagefeed.helpers import render, view, host_for_url
 
-from lib.BeautifulSoup import BeautifulSoup, HTMLParseError
+from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
 
 DEFAULT_TITLE = '[pagefeed saved item]'
 
-from helpers import view
 import re
 
 class Unparseable(ValueError):
@@ -27,10 +26,11 @@ class Page(db.Model):
 	
 	@staticmethod
 	def _get_title(soup):
-		return unicode(soup.title.string or DEFAULT_TITLE)
+		return unicode(getattr(soup.title, 'string', DEFAULT_TITLE))
 	
 	@staticmethod
 	def _get_body(soup):
+		[ elem.extract() for elem in soup.findAll(['script', 'link', 'style']) ]
 		return unicode(soup.body or soup)
 
 	@staticmethod
@@ -38,6 +38,7 @@ class Page(db.Model):
 		script_re = re.compile(
 			'<script.*?</script[^>]*>',
 			re.MULTILINE | re.IGNORECASE)
+		print repr(content)
 		return script_re.sub('', content)
 	
 	def _populate_content(self, raw_content):
@@ -48,22 +49,35 @@ class Page(db.Model):
 			self.title = self._get_title(soup)
 		except Unparseable, e:
 			safe_content = ascii(raw_content)
-			self._failed(e.message, safe_content)
+			self._failed(str(e), safe_content)
+	
+	@classmethod
+	def _parse_methods(cls):
+		def unicode_removed_script_tags(content):
+			content = UnicodeDammit(content, isHTML=True).markup
+			return BeautifulSoup(cls._remove_script_tags(content))
+		
+		def ascii_removed_script_tags(content):
+			content = ascii(content)
+			return BeautifulSoup(cls._remove_script_tags(content))
+		
+		return (
+			BeautifulSoup,
+			unicode_removed_script_tags,
+			ascii_removed_script_tags)
 	
 	@classmethod
 	def _parse_content(cls, raw_content):
-		try:
-			return BeautifulSoup(raw_content)
-		except HTMLParseError, e:
-			error("initial parsing failed: %s" % (e.message,))
-			original_msg = e.message
-			safe_content = ascii(raw_content)
+		first_err = None
+		for parse_method in cls._parse_methods():
 			try:
-				return BeautifulSoup(cls._remove_script_tags(safe_content))
+				return parse_method(raw_content)
 			except HTMLParseError, e:
-				error("failsafe parsing also failed: %s" % (e.message,))
-				raise Unparseable(original_msg)
-			
+				if first_err is None:
+					first_err = e
+				error("parsing (with %s) failed: %s" % (parse_method, e))
+				continue
+		raise Unparseable(str(first_err))
 
 	def fetch(self):
 		try:
@@ -72,9 +86,9 @@ class Page(db.Model):
 				raise DownloadError("request returned status code %s\n%s" % (response.status_code, response.content))
 			self._populate_content(response.content)
 		except DownloadError, e:
-			self._failed(e.message, 'no content was downloaded')
+			self._failed(str(e), 'no content was downloaded')
 	
-	def _failed(self, error, content=''):
+	def _failed(self, error, content):
 		debug("error: %s" % (error,))
 		self.title = DEFAULT_TITLE
 		self.error = error
@@ -105,5 +119,14 @@ class Page(db.Model):
 		return render('page.html', {'content':self.content, 'error': self.error is not None})
 	html = property(as_html)
 	
-	#todo: "host" and "soup" attributes (derived)
+	def _get_host(self):
+		return host_for_url(self.url)
+	host = property(_get_host)
+	
+	def _get_soup(self):
+		if self.error:
+			return None
+		return BeautifulSoup(self.content)
+	soup = property(_get_soup)
+
 

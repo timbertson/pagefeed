@@ -5,7 +5,7 @@ from errors import HttpError, RedirectError
 
 import logging
 from logging import debug, info, error
-from helpers import view, render, render_page, host
+from helpers import view, render, render_page, host_for_url
 
 class BaseHandler(webapp.RequestHandler):
 	def handle_exception(self, exc, *a, **k):

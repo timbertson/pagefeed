@@ -10,7 +10,7 @@ class MainHandler(BaseHandler):
 		user_handle = UserID.get(email).handle
 		uri = self.uri() + 'feed/%s-%s/' % (user_handle, urllib2.quote(email))
 		
-		bookmarklet_js = render('bookmarklet.js', {'host':host(self.uri())})
+		bookmarklet_js = render('bookmarklet.js', {'host':host_for_url(self.uri())})
 		bookmarklet_js.replace('\n', ' ')
 		template_values = {
 			'name': user.nickname(),

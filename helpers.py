@@ -9,7 +9,7 @@ LAYOUT = 'layout'
 def view(*parts):
 	return path.join(path.dirname(__file__), 'views', *parts)
 
-def host(url):
+def host_for_url(url):
 	try:
 		return url.split('/')[2]
 	except IndexError:

@@ -13,10 +13,108 @@ class PageTest(TestCase):
 		url = 'http://localhost/some/path'
 		mock_on(page).fetch.is_expected.with_(url).returning(result.raw)
 		
-		p = page.Page(url=url, owner=a_user)
-		p.put()
+		p = new_page(url)
 		self.assertEqual(p.title, 'the title!')
 		self.assertEqual(p.content, '<body>the body!</body>')
+		self.assertFalse(p.error)
+	
+	def test_should_fall_back_to_a_default_title(self):
+		stub_result("<html><body>no title...</body></html>")
+		p = new_page()
+		self.assertEqual(p.title, page.DEFAULT_TITLE)
+		self.assertTrue("no title..." in p.content)
+		self.assertFalse(p.error)
 
+	def test_should_fall_back_to_the_whole_html_if_it_has_no_body(self):
+		html = "<html><title>no body</title></html>"
+		stub_result(html)
+		p = new_page()
+		self.assertEqual(p.title, 'no body')
+		self.assertEqual(p.content, html)
+		self.assertFalse(p.error)
+
+	def test_should_try_stripping_out_script_tags_on_unparseable(self):
+		html = "<html><script></scr + ipt></script><body>caf\xc3\xa9</body>" # utf-8 "acute accented e"
+		stub_result(html)
+		p = new_page()
+		self.assertEqual(p.content, u'<body>caf\xe9</body>') # correctly unicode'd
+		self.assertFalse(p.error)
+
+	def test_should_just_use_ascii_converted_html_on_completely_unparseable(self):
+		ascii_html = "<html></scr + ipt>"
+		bad_html = ascii_html + "\xd5"
+		stub_result(bad_html)
+		p = new_page()
+		self.assertEqual(p.title, page.DEFAULT_TITLE)
+		self.assertEqual(p.content, ascii_html)
+		self.assertTrue(p.error)
+	
+	def test_should_strip_out_script_and_style_and_link_tags(self):
+		html = "<html><body><script></script><style></style><link /></body>"
+		stub_result(html)
+		p = new_page()
+		self.assertEqual(p.content, "<body></body>")
+		self.assertFalse(p.error)
+
+	def test_should_note_an_error_when_download_fails(self):
+		stub_result('', status_code = 400)
+		p = new_page()
+		self.assertTrue(p.error)
+
+	def test_should_retry_a_failed_download_on_update(self):
+		stub_result('', status_code=404)
+		mock_on(page).fetch.is_expected.twice
+
+		p = new_page()
+		p.update()
+
+	def test_should_not_retry_a_successful_download_on_update(self):
+		stub_result('')
+		mock_on(page).fetch.is_expected.once
+
+		p = new_page()
+		p.update()
+
+	@pending("no force argument yet")
+	def test_should_retry_a_successful_download_on_update_if_forced(self):
+		stub_result('')
+		mock_on(page).fetch.is_expected.twice
+
+		p = new_page()
+		p.update(force=True)
+
+	def test_should_render_as_html(self):
+		url = 'http://my_url'
+		p = page_with_html('<title>t</title><body>b</body>', url=url)
+		self.assertEqual(p.html.strip(), '<body>b</body>')
+
+	def test_should_render_as_html_with_errors(self):
+		url = 'http://my_url'
+		orig_html = '<title>t</title><body>b<scr + ipt /></body>'
+
+		p = page_with_html(orig_html, url=url)
+		html = p.html
+		self.assertTrue('An error occurred' in html, html)
+		self.assertTrue(orig_html in html, html)
+
+	def test_should_have_soup_and_host_attributes(self):
+		url = 'http://google.com/some/page'
+		stub_result('<body><p>woo!</p></body>')
+		p = new_page(url)
+		self.assertEqual(p.host, 'google.com')
+		self.assertEqual(p.soup.body.p.string, 'woo!')
+
+def new_page(url='http://localhost/dontcare'):
+	p = page.Page(url=url, owner=a_user)
+	p.put()
+	return p
+
+def stub_result(content, status_code=200):
+	result = mock('result').with_children(status_code=status_code, content=content)
+	mock_on(page).fetch.returning(result.raw)
+
+def page_with_html(html, url='http://url'):
+	stub_result(html)
+	return new_page(url)
 
 
