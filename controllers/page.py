@@ -31,6 +31,7 @@ class PageHandler(BaseHandler):
 			self.response.out.write("deleted")
 			self.redirect('/')
 		else:
+			info("could not find page: %s" % (self.url(),))
 			raise HttpError(404, "could not find saved page: %s" % (cgi.escape(self.url(),)))
 
 class PageBookmarkletHandler(PageHandler):
