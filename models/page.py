@@ -16,6 +16,25 @@ class Unparseable(ValueError):
 def ascii(s):
 	return s.decode('ascii', 'ignore')
 
+class Replacement(object):
+	def __init__(self, desc, regex, replacement):
+		self.desc = desc
+		self.regex = regex
+		self.replacement = replacement
+	
+	def apply(self, content):
+		return self.regex.sub(self.replacement, content)
+
+# a bunch of regexes to hack around lousy html
+dodgy_regexes = (
+	Replacement('javascript',
+		regex=re.compile('<script.*?</script[^>]*>', re.DOTALL | re.IGNORECASE),
+		replacement=''),
+	Replacement('double double-quoted attributes',
+		regex=re.compile('(="[^"]+")"+'),
+		replacement='\\1'),
+	)
+
 class Page(db.Model):
 	url = db.URLProperty(required=True)
 	content = db.TextProperty()
@@ -34,12 +53,10 @@ class Page(db.Model):
 		return unicode(soup.body or soup)
 
 	@staticmethod
-	def _remove_script_tags(content):
-		script_re = re.compile(
-			'<script.*?</script[^>]*>',
-			re.DOTALL | re.IGNORECASE)
-		print repr(content)
-		return script_re.sub('', content)
+	def _remove_crufty_html(content):
+		for replacement in dodgy_regexes:
+			content = replacement.apply(content)
+		return content
 	
 	def _populate_content(self, raw_content):
 		self.error = None
@@ -53,18 +70,18 @@ class Page(db.Model):
 	
 	@classmethod
 	def _parse_methods(cls):
-		def unicode_removed_script_tags(content):
+		def unicode_cleansed(content):
 			content = UnicodeDammit(content, isHTML=True).markup
-			return BeautifulSoup(cls._remove_script_tags(content))
+			return BeautifulSoup(cls._remove_crufty_html(content))
 		
-		def ascii_removed_script_tags(content):
+		def ascii_cleansed(content):
 			content = ascii(content)
-			return BeautifulSoup(cls._remove_script_tags(content))
+			return BeautifulSoup(cls._remove_crufty_html(content))
 		
 		return (
 			BeautifulSoup,
-			unicode_removed_script_tags,
-			ascii_removed_script_tags)
+			unicode_cleansed,
+			ascii_cleansed)
 	
 	@classmethod
 	def _parse_content(cls, raw_content):
