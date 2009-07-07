@@ -34,7 +34,11 @@ class PageTest(TestCase):
 		self.assertFalse(p.error)
 
 	def test_should_try_stripping_out_script_tags_on_unparseable(self):
-		html = "<html><script></scr + ipt></script><body>caf\xc3\xa9</body>" # utf-8 "acute accented e"
+		html = """<html>
+			<script>
+				</scr + ipt>
+			</script>
+			<body>caf\xc3\xa9</body>""" # note the utf-8 "acute accented e"
 		stub_result(html)
 		p = new_page()
 		self.assertEqual(p.content, u'<body>caf\xe9</body>') # correctly unicode'd

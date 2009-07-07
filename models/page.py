@@ -1,7 +1,7 @@
 from google.appengine.ext import db
 
 from google.appengine.api.urlfetch import fetch, DownloadError
-from pagefeed.helpers import render, view, host_for_url
+from helpers import render, view, host_for_url
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
@@ -37,7 +37,7 @@ class Page(db.Model):
 	def _remove_script_tags(content):
 		script_re = re.compile(
 			'<script.*?</script[^>]*>',
-			re.MULTILINE | re.IGNORECASE)
+			re.DOTALL | re.IGNORECASE)
 		print repr(content)
 		return script_re.sub('', content)
 	
