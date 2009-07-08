@@ -6,6 +6,9 @@ from webtest import TestApp
 
 import os
 from pagefeed.main import application
+from lib.BeautifulSoup import BeautifulSoup
+
+ROOT_URL = "http://localhost/"
 
 class RootTest(TestCase):
 	user = 'foo@example.com'
@@ -36,6 +39,7 @@ class RootTest(TestCase):
 		page = self.stub_page()
 		response = self.app().get('/')
 		forms = response.forms
+		self.assertEqual(len(forms), 2) # 1 delete page, 1 add page
 		delete_form = forms[1]
 		
 		def check(owner, url):
@@ -45,7 +49,22 @@ class RootTest(TestCase):
 		mock_on(Page).find.with_action(check)
 		
 		response = delete_form.submit().follow()
-		self.assertEqual(response.request.url, 'http://localhost/')
-		
+		self.assertEqual(response.request.url, ROOT_URL)
 	
+	@pending
+	def test_should_indicate_failed_items_and_allow_them_to_be_retried(self):
+		page = self.stub_page()
+		Page.fetch.is_expected.twice() # once for the initial save, and once for the update
+		response = self.app().get('/')
+		
+		soup = BeautifulSoup(response.body)
+		self.assertEqual(len(soup.findAll('dt', attrs={'class':'page error'})), 1)
+		
+		forms = response.forms
+		update_form = forms[2]
+		response = update_form.submit().follow()
+		self.assertEqual(response.request.url, ROOT_URL)
+
+		soup = BeautifulSoup(response.body)
+		self.assertEqual(len(soup.findAll('dt', attrs={'class':'page error'})), 0)
 
