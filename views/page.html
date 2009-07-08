@@ -1,4 +1,6 @@
 {% if error %}
 <h4>(An error occurred while processing this page. Below is the un-processed content)</h4>
 {% endif %}
-{{content}}
+
+<base href="{{ page.base_href|escape }}" />
+{{ page.content }}

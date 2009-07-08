@@ -139,7 +139,7 @@ class Page(db.Model):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
 	
 	def as_html(self):
-		return render('page.html', {'content':self.content, 'error': self.error is not None})
+		return render('page.html', {'page':self, 'error': self.error is not None})
 	html = property(as_html)
 	
 	def _get_host(self):
@@ -154,7 +154,7 @@ class Page(db.Model):
 	
 	def _get_base_href(self):
 		base_parts = self.url.split('/')
-		if len(base_parts) > 3: # more than ("http:", "", "server")
+		if len(base_parts) > 3: # more parts than ("http:", "", "server")
 			base_parts = base_parts[:-1] # trim the last component
 		base = '/'.join(base_parts) + '/'
 		return base
