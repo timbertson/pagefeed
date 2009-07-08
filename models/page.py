@@ -64,7 +64,7 @@ class Page(db.Model):
 			content = replacement.apply(content)
 		return content
 	
-	def _populate_content(self, raw_content):
+	def populate_content(self, raw_content):
 		self.error = None
 		try:
 			soup = self._parse_content(raw_content)
@@ -107,7 +107,7 @@ class Page(db.Model):
 			response = fetch(self.url)
 			if response.status_code >= 400:
 				raise DownloadError("request returned status code %s\n%s" % (response.status_code, response.content))
-			self._populate_content(response.content)
+			self.populate_content(response.content)
 		except DownloadError, e:
 			self._failed(str(e), 'no content was downloaded')
 	
@@ -151,5 +151,13 @@ class Page(db.Model):
 			return None
 		return BeautifulSoup(self.content)
 	soup = property(_get_soup)
+	
+	def _get_base_href(self):
+		base_parts = self.url.split('/')
+		if len(base_parts) > 3: # more than ("http:", "", "server")
+			base_parts = base_parts[:-1] # trim the last component
+		base = '/'.join(base_parts) + '/'
+		return base
+	base_href = property(_get_base_href)
 
 

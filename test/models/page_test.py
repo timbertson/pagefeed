@@ -13,7 +13,7 @@ class PageTest(TestCase):
 		url = 'http://localhost/some/path'
 		mock_on(page).fetch.is_expected.with_(url).returning(result.raw)
 		
-		p = new_page(url)
+		p = new_page(url=url)
 		self.assertEqual(p.title, 'the title!')
 		self.assertEqual(p.content, '<body>the body!</body>')
 		self.assertFalse(p.error)
@@ -89,40 +89,46 @@ class PageTest(TestCase):
 
 	def test_should_render_as_html(self):
 		url = 'http://my_url'
-		p = page_with_html('<title>t</title><body>b</body>', url=url)
+		p = new_page('<title>t</title><body>b</body>', url=url)
 		self.assertEqual(p.html.strip(), '<body>b</body>')
 
 	def test_should_render_as_html_with_errors(self):
 		url = 'http://my_url'
 		orig_html = '<title>t</title><body>b<scr + ipt /></body>'
 
-		p = page_with_html(orig_html, url=url)
+		p = new_page(orig_html, url=url)
 		html = p.html
 		self.assertTrue('An error occurred' in html, html)
 		self.assertTrue(orig_html in html, html)
 
 	def test_should_have_soup_and_host_attributes(self):
-		url = 'http://google.com/some/page'
-		stub_result('<body><p>woo!</p></body>')
-		p = new_page(url)
+		p = new_page('<body><p>woo!</p></body>', url='http://google.com/some/page')
 		self.assertEqual(p.host, 'google.com')
 		self.assertEqual(p.soup.body.p.string, 'woo!')
 
+	def test_should_have_base_href_attribute(self):
+		def assert_base(url, expected_base):
+			self.assertEqual(new_page(content='', url=url).base_href, expected_base)
+
+		assert_base('http://localhost/aa/bbbb/c', 'http://localhost/aa/bbbb/')
+		assert_base('http://localhost/aa', 'http://localhost/')
+		assert_base('http://localhost/', 'http://localhost/')
+		assert_base('http://localhost', 'http://localhost/')
+
 	def test_should_accept_multiline_titles(self):
-		p = page_with_html("<title>foo\nbar</title>")
+		p = new_page("<title>foo\nbar</title>")
 		self.assertEqual(p.title, "foo bar")
 
-def new_page(url='http://localhost/dontcare'):
+def new_page(content=None, url='http://localhost/dontcare'):
 	p = page.Page(url=url, owner=a_user)
-	p.put()
+	if content is None:
+		p.put()
+	else:
+		p.populate_content(content)
 	return p
 
 def stub_result(content, status_code=200):
 	result = mock('result').with_children(status_code=status_code, content=content)
 	mock_on(page).fetch.returning(result.raw)
-
-def page_with_html(html, url='http://url'):
-	stub_result(html)
-	return new_page(url)
 
 
