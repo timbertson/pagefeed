@@ -25,6 +25,11 @@ class Replacement(object):
 	def apply(self, content):
 		return self.regex.sub(self.replacement, content)
 
+def normalize_spaces(s):
+	"""replace any sequence of whitespace
+	characters with a single space"""
+	return ' '.join(s.split())
+
 # a bunch of regexes to hack around lousy html
 dodgy_regexes = (
 	Replacement('javascript',
@@ -45,7 +50,8 @@ class Page(db.Model):
 	
 	@staticmethod
 	def _get_title(soup):
-		return unicode(getattr(soup.title, 'string', DEFAULT_TITLE))
+		title = unicode(getattr(soup.title, 'string', DEFAULT_TITLE))
+		return normalize_spaces(title)
 	
 	@staticmethod
 	def _get_body(soup):

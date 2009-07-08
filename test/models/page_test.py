@@ -108,6 +108,10 @@ class PageTest(TestCase):
 		self.assertEqual(p.host, 'google.com')
 		self.assertEqual(p.soup.body.p.string, 'woo!')
 
+	def test_should_accept_multiline_titles(self):
+		p = page_with_html("<title>foo\nbar</title>")
+		self.assertEqual(p.title, "foo bar")
+
 def new_page(url='http://localhost/dontcare'):
 	p = page.Page(url=url, owner=a_user)
 	p.put()
