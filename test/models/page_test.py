@@ -1,6 +1,8 @@
 from pagefeed.test.helpers import *
 from models import page
 
+from pagefeed.test.fixtures import a_user
+
 class PageTest(TestCase):
 	def test_should_load_well_formed_page(self):
 		content = """
