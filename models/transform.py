@@ -17,8 +17,8 @@ class Transform(db.Model):
 		return soup
 	
 	@classmethod
-	def find_all_for_user_and_host(cls, user, host):
-		pass
+	def find_all_for_user_and_host(cls, owner, host):
+		return db.Query(cls).filter('owner =', owner).filter('host_match =', host).order('index').fetch(limit=50)
 	
 	@staticmethod
 	def apply_all(filters, inital):
@@ -28,8 +28,8 @@ class Transform(db.Model):
 		return result
 	
 	@classmethod
-	def process(cls, user, page):
-		filters = cls.find_all_for_user_and_host(user, page.host)
-		cls.apply_all(filters, page.soup)
+	def process(cls, page):
+		filters = cls.find_all_for_user_and_host(page.owner, page.host)
+		return cls.apply_all(filters, page.soup)
 
 

@@ -5,6 +5,7 @@ from helpers import render, view, host_for_url
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
+from transform import Transform
 
 DEFAULT_TITLE = '[pagefeed saved item]'
 
@@ -47,6 +48,10 @@ class Page(db.Model):
 	error = db.TextProperty()
 	owner = db.UserProperty(required=True)
 	date = db.DateTimeProperty(auto_now_add=True)
+
+	def __init__(self, *a, **k):
+		super(type(self), self).__init__(*a, **k)
+		self.transformed = False
 	
 	@staticmethod
 	def _get_title(soup):
@@ -73,6 +78,15 @@ class Page(db.Model):
 		except Unparseable, e:
 			safe_content = ascii(raw_content)
 			self._failed(str(e), safe_content)
+			return
+		if self.transformed:
+			return
+		else:
+			self.transformed = True
+			self.apply_transforms()
+
+	def apply_transforms(self):
+		self.content = unicode(Transform.process(self))
 	
 	@classmethod
 	def _parse_methods(cls):
@@ -116,6 +130,11 @@ class Page(db.Model):
 		self.title = DEFAULT_TITLE
 		self.error = error
 		self.content = content
+	
+	def replace_url(self, new_url):
+		self.content = None
+		self.url = new_url
+		self.put()
 	
 	def update(self):
 		if self.error is not None:

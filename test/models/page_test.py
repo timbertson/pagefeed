@@ -1,5 +1,5 @@
 from pagefeed.test.helpers import *
-from models import page
+from models import page, Transform
 
 class PageTest(TestCase):
 	def test_should_load_well_formed_page(self):
@@ -59,6 +59,38 @@ class PageTest(TestCase):
 		p = new_page()
 		self.assertEqual(p.content, "<body></body>")
 		self.assertFalse(p.error)
+	
+	def test_should_apply_all_matching_transforms(self):
+		filter1 = mock('filter1')
+		filter2 = mock('filter2')
+		filters = [filter1.raw, filter2.raw]
+
+		p = page.Page(owner=a_user, url='http://sub.localhost.com/some/path/to/file.html')
+		initial_soup = mock_on(page.Page).soup
+		intermediate_soup = mock('initial_soup')
+		final_soup = mock('final_soup')
+
+		mock_on(Transform).find_all_for_user_and_host.with_(a_user, 'sub.localhost.com').is_expected.returning(filters)
+		filter1.expects('apply').with_(initial_soup.raw).returning(intermediate_soup.raw)
+		filter2.expects('apply').with_(intermediate_soup.raw).returning(final_soup.raw)
+		final_soup.expects('__str__').returning('final content')
+		
+		mock_on(page).fetch.returning(mock('fetched page').with_children(status_code=200, content='some stuff').raw)
+		p.put()
+		self.assertEqual(p.content, 'final content')
+
+	def test_should_update_url(self):
+		p = new_page(content='initial content')
+		new_url = 'http://new_url'
+		response = mock('response').with_children(status_code=200, content='new content')
+		mock_on(page).fetch.is_expected.with_(new_url).returning(response.raw)
+		p.replace_url(new_url)
+		self.assertEqual(p.url, new_url)
+		self.assertEqual(p.content, 'new content')
+	
+	@ignore
+	def test_should_extract_xpath_elements(self):
+		pass
 
 	def test_should_note_an_error_when_download_fails(self):
 		stub_result('', status_code = 400)
