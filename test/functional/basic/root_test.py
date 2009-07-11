@@ -1,7 +1,9 @@
-from pagefeed.test.helpers import *
-from models.page import Page
+import urllib2
 from google.appengine.api import users
 
+from models import Page, UserID
+
+from pagefeed.test.helpers import *
 from pagefeed.test import fixtures
 
 class RootTest(TestCase):
@@ -12,6 +14,21 @@ class RootTest(TestCase):
 		
 		response.mustcontain('Welcome, foo')
 		response.mustcontain(page.title)
+	
+	def test_should_link_to_feed_for_a_logged_in_user(self):
+		page = fixtures.stub_page()
+		response = fixtures.app().get('/')
+		
+		response.mustcontain(page.title)
+
+		user = fixtures.a_user
+		email = user.email()
+		user_handle = UserID.get(email).handle
+		
+		feed_link = '/feed/%s-%s/' % (user_handle, urllib2.quote(email))
+		content = response.body
+		response.mustcontain('<link href="%s" type="application/rss+xml"' % (feed_link))
+		response.mustcontain('<a href="%s"' % feed_link)
 	
 	def test_should_delete_items_and_redirect_to_root(self):
 		page = fixtures.stub_page()

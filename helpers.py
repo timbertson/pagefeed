@@ -36,9 +36,10 @@ def render_page(name, values, layout='standard.html', partial=False):
 		return render(CONTENT, name + '.html', values)
 	header  = _render_if_exists(view(HEADER, name + '.html'), values)
 	content = _render_if_exists(view(CONTENT, name + '.html'), values)
-	layout_values = dict(
+	layout_values = values.copy()
+	layout_values.update(dict(
 		title = values.get('title', None),
 		header = header,
-		content = content)
+		content = content))
 	return render(LAYOUT, layout, layout_values)
 

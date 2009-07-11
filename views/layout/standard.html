@@ -2,6 +2,9 @@
 	<head>
 		<title>Pagefeed{% if title %}: {{title|escape}}{% endif %}</title>
 		<link rel="stylesheet" href="/public/index.css" />
+		{% if feed_link %}
+			<link href="{{feed_link|escape}}" type="application/rss+xml" rel="alternate" title="PageFeed saved items" />
+		{% endif %}
 	</head>
 	
 	<body>
