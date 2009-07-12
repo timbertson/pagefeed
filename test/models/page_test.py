@@ -79,13 +79,16 @@ class PageTest(TestCase):
 		p.put()
 		self.assertEqual(p.content, 'final content')
 
-	def test_should_update_url(self):
-		p = new_page(content='initial content')
+	def test_should_fetch_content_from_new_url(self):
+		old_url = 'http://old_url'
 		new_url = 'http://new_url'
+		p = new_page(content='initial content', url=old_url)
+
 		response = mock('response').with_children(status_code=200, content='new content')
 		mock_on(page).fetch.is_expected.with_(new_url).returning(response.raw)
-		p.replace_url(new_url)
-		self.assertEqual(p.url, new_url)
+		p.replace_with_contents_from(new_url)
+
+		self.assertEqual(p.url, old_url)
 		self.assertEqual(p.content, 'new content')
 	
 	@ignore

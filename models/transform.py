@@ -34,3 +34,18 @@ class Transform(BaseModel):
 		return cls.apply_all(filters, page.soup)
 
 
+class FollowTransform(Transform):
+	name = "follow link"
+	def apply(self):
+		pass
+
+class DeleteTransform(Transform):
+	name = "remove items"
+	def apply(self):
+		pass
+	
+class SelectTransform(Transform):
+	name = "select subsets of page"
+	def apply(self):
+		pass
+	

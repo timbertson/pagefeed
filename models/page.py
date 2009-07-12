@@ -46,9 +46,9 @@ dodgy_regexes = (
 
 class Page(BaseModel):
 	url = db.URLProperty(required=True)
+	_content_url = db.URLProperty()
 	content = db.TextProperty()
 	title = db.StringProperty()
-	error = db.TextProperty()
 	owner = db.UserProperty(required=True)
 	date = db.DateTimeProperty(auto_now_add=True)
 	_messages = db.StringListProperty()
@@ -120,7 +120,7 @@ class Page(BaseModel):
 
 	def fetch(self):
 		try:
-			response = fetch(self.url)
+			response = fetch(self.content_url)
 			if response.status_code >= 400:
 				raise DownloadError("request returned status code %s\n%s" % (response.status_code, response.content))
 			self.populate_content(response.content)
@@ -128,25 +128,24 @@ class Page(BaseModel):
 			self._failed(str(e), 'no content was downloaded')
 	
 	def _failed(self, error, content):
-		warning("parse error: %s (url is: %s)" % (error,self.url))
+		warning("parse error: %s (url is: %s)" % (error,self.content_url))
 		self.title = DEFAULT_TITLE
 		self.error(error)
 		self.content = content
 	
-	def replace_url(self, new_url):
-		orig_url = self.url
+	def replace_with_contents_from(self, new_url):
 		self._reset()
-		self.info("original url: %s" % (orig_url,))
-		self.url = new_url
+		debug("replacing page %s with %s" % (self.url, new_url))
+		self._content_url = new_url
 		self.put()
 	
 	def update(self):
 		if self.errors:
-			info("page %s had an error - redownloading...." % (self.url,))
+			info("page %s had an error - redownloading...." % (self.content_url,))
 			self._reset()
 			self.put()
 			if not self.errors:
-				info("page %s retrieved successfully!" % (self.url,))
+				info("page %s retrieved successfully!" % (self.content_url,))
 	
 	def put(self, *a, **k):
 		if self.content is None:
@@ -166,7 +165,7 @@ class Page(BaseModel):
 	html = property(as_html)
 	
 	def _get_host(self):
-		return host_for_url(self.url)
+		return host_for_url(self.content_url)
 	host = property(_get_host)
 	
 	def _get_soup(self):
@@ -175,8 +174,12 @@ class Page(BaseModel):
 		return BeautifulSoup(self.content)
 	soup = property(_get_soup)
 	
+	def _get_content_url(self):
+		return self._content_url or self.url
+	content_url = property(_get_content_url)
+	
 	def _get_base_href(self):
-		base_parts = self.url.split('/')
+		base_parts = self.content_url.split('/')
 		if len(base_parts) > 3: # more parts than ("http:", "", "server")
 			base_parts = base_parts[:-1] # trim the last component
 		base = '/'.join(base_parts) + '/'
@@ -189,6 +192,8 @@ class Page(BaseModel):
 	
 	def _reset(self):
 		self.content = None
+		self._content_url = None
+		self.transformed = False
 		self._messages = []
 
 	def _get_messages(self):
