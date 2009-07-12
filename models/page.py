@@ -71,13 +71,11 @@ class Page(BaseModel):
 		self._content_url = new_url
 		self.put()
 	
-	def update(self):
-		if self.errors:
-			info("page %s had an error - redownloading...." % (self.content_url,))
+	def update(self, force=False):
+		if force or self.errors:
+			info("page %s: update...." % (self.content_url,))
 			self._reset()
 			self.put()
-			if not self.errors:
-				info("page %s retrieved successfully!" % (self.content_url,))
 	
 	def put(self, *a, **k):
 		if self.content is None:

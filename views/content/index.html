@@ -5,7 +5,11 @@
 			<dt>
 				<form action="/page/del/" method="POST" class="del">
 					<input type="hidden" name="url" value="{{page.url|escape}}" />
-					<input type="submit" value="x" />
+					<input type="submit" value="X" />
+				</form>
+				<form action="/page/update/" method="POST" class="update">
+					<input type="hidden" name="url" value="{{page.url|escape}}" />
+					<input type="submit" value="R" />
 				</form>
 				<a href="{{page.url|escape}}">{{page.title}}</a>
 			</dt>

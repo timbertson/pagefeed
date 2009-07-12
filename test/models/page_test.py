@@ -110,7 +110,6 @@ class PageTest(TestCase):
 		p = new_page()
 		p.update()
 
-	@pending("no force argument yet")
 	def test_should_retry_a_successful_download_on_update_if_forced(self):
 		stub_result('')
 		mock_on(page).fetch.is_expected.twice

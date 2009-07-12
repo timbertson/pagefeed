@@ -45,5 +45,21 @@ class RootTest(TestCase):
 		response = delete_form.submit().follow()
 		self.assertEqual(response.request.url, 'http://localhost/')
 		
+	def test_should_update_items_and_redirect_to_root(self):
+		page = fixtures.stub_page()
+		response = fixtures.app().get('/')
+		forms = response.forms
+		update_form = forms[2]
+		
+		def check(owner, url):
+			self.assertEqual(url, page.url)
+			return page
+			
+		mock_on(Page).find.with_action(check)
+		mock_on(page).update.is_expected.with_(force=True)
+		
+		response = update_form.submit().follow()
+		self.assertEqual(response.request.url, 'http://localhost/')
+		
 	
 

@@ -13,6 +13,7 @@ application = webapp.WSGIApplication([
 		('/page/', PageHandler),
 		('/page/bookmarklet/', PageBookmarkletHandler),
 		('/page/del/', PageDeleteHandler),
+		('/page/update/', PageUpdateHandler),
 		# ('/transform/', TransformHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
 		(r'/migrate/(?:([^/]+)/?)?', MigrateHandler),

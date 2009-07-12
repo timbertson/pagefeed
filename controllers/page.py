@@ -4,13 +4,13 @@ from base import *
 from models import Page
 
 class PageHandler(BaseHandler):
-	def _add(self, user, url, success = None):
+	def _add(self, user, url, success = None, force=False):
 		page = Page.find(user, url)
 		if page is None:
 			page = Page(owner=self.user(), url=url)
 			page.put()
 		else:
-			page.update()
+			page.update(force=force)
 		if page.errors:
 			self._render_error(page)
 		else:
@@ -44,3 +44,7 @@ class PageBookmarkletHandler(PageHandler):
 class PageDeleteHandler(PageHandler):
 	# alias for DELETE on PageHandler
 	get = post = PageHandler.delete
+
+class PageUpdateHandler(PageHandler):
+	def post(self):
+		page = self._add(self.user(), self.url(), success = lambda x: self.redirect('/'), force=True)
