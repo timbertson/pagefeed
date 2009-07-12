@@ -128,7 +128,7 @@ class Page(BaseModel):
 			self._failed(str(e), 'no content was downloaded')
 	
 	def _failed(self, error, content):
-		debug("error: %s" % (error,))
+		warning("parse error: %s (url is: %s)" % (error,self.url))
 		self.title = DEFAULT_TITLE
 		self.error(error)
 		self.content = content
@@ -186,14 +186,12 @@ class Page(BaseModel):
 	def _add_msg(self, type_, msg):
 		assert type_ in MESSAGE_TYPES
 		self._messages.append("%s %s" % (type_, msg))
-		debug("messages are now: " + "\n".join(self._messages))
 	
 	def _reset(self):
 		self.content = None
 		self._messages = []
 
 	def _get_messages(self):
-		info(self._messages)
 		return [msg.split(' ', 1) for msg in self._messages]
 	messages = property(_get_messages)
 	
