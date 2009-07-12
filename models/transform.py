@@ -15,24 +15,16 @@ class Transform(BaseModel):
 	index = db.IntegerProperty()
 	
 	def apply(self, soup):
-		return soup
+		pass
 	
 	@classmethod
 	def find_all_for_user_and_host(cls, owner, host):
 		return db.Query(cls).filter('owner =', owner).filter('host_match =', host).order('index').fetch(limit=50)
 	
-	@staticmethod
-	def apply_all(filters, inital):
-		result = inital
-		for filter_ in filters:
-			result = filter_.apply(result)
-		return result
-	
 	@classmethod
 	def process(cls, page):
 		filters = cls.find_all_for_user_and_host(page.owner, page.host)
-		return cls.apply_all(filters, page.soup)
-
+		[filter_.apply(page) for filter_ in filters]
 
 class FollowTransform(Transform):
 	name = "follow link"

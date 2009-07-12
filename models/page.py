@@ -7,42 +7,13 @@ from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
 from transform import Transform
 from base import BaseModel
-
-DEFAULT_TITLE = '[pagefeed saved item]'
+import page_parser as parser
 
 import re
 
+DEFAULT_TITLE = '[pagefeed saved item]'
+
 MESSAGE_TYPES = ['error', 'info']
-
-class Unparseable(ValueError):
-	pass
-
-def ascii(s):
-	return s.decode('ascii', 'ignore')
-
-class Replacement(object):
-	def __init__(self, desc, regex, replacement):
-		self.desc = desc
-		self.regex = regex
-		self.replacement = replacement
-	
-	def apply(self, content):
-		return self.regex.sub(self.replacement, content)
-
-def normalize_spaces(s):
-	"""replace any sequence of whitespace
-	characters with a single space"""
-	return ' '.join(s.split())
-
-# a bunch of regexes to hack around lousy html
-dodgy_regexes = (
-	Replacement('javascript',
-		regex=re.compile('<script.*?</script[^>]*>', re.DOTALL | re.IGNORECASE),
-		replacement=''),
-	Replacement('double double-quoted attributes',
-		regex=re.compile('(="[^"]+")"+'),
-		replacement='\\1'),
-	)
 
 class Page(BaseModel):
 	url = db.URLProperty(required=True)
@@ -56,30 +27,14 @@ class Page(BaseModel):
 	def __init__(self, *a, **k):
 		super(type(self), self).__init__(*a, **k)
 		self.transformed = False
-	
-	@staticmethod
-	def _get_title(soup):
-		title = unicode(getattr(soup.title, 'string', DEFAULT_TITLE))
-		return normalize_spaces(title)
-	
-	@staticmethod
-	def _get_body(soup):
-		[ elem.extract() for elem in soup.findAll(['script', 'link', 'style']) ]
-		return unicode(soup.body or soup)
 
-	@staticmethod
-	def _remove_crufty_html(content):
-		for replacement in dodgy_regexes:
-			content = replacement.apply(content)
-		return content
-	
 	def populate_content(self, raw_content):
 		try:
-			soup = self._parse_content(raw_content)
-			self.content = self._get_body(soup)
-			self.title = self._get_title(soup)
-		except Unparseable, e:
-			safe_content = ascii(raw_content)
+			page = parser.parse(raw_content, notify=self.info)
+			self.content = parser.get_body(page)
+			self.title = parser.get_title(page) or DEFAULT_TITLE
+		except parser.Unparseable, e:
+			safe_content = parser.ascii(raw_content)
 			self._failed("failed to parse content", safe_content)
 			return
 		if self.transformed:
@@ -89,34 +44,7 @@ class Page(BaseModel):
 			self.apply_transforms()
 
 	def apply_transforms(self):
-		self.content = unicode(Transform.process(self))
-	
-	@classmethod
-	def _parse_methods(cls):
-		def unicode_cleansed(content):
-			content = UnicodeDammit(content, isHTML=True).markup
-			return BeautifulSoup(cls._remove_crufty_html(content))
-		
-		def ascii_cleansed(content):
-			content = ascii(content)
-			return BeautifulSoup(cls._remove_crufty_html(content))
-		
-		return (
-			BeautifulSoup,
-			unicode_cleansed,
-			ascii_cleansed)
-	
-	def _parse_content(self, raw_content):
-		first_err = None
-		for parse_method in self._parse_methods():
-			try:
-				return parse_method(raw_content)
-			except HTMLParseError, e:
-				if first_err is None:
-					first_err = e
-				self.info("parsing (%s) failed: %s" % (parse_method.__name__, e))
-				continue
-		raise Unparseable()
+		Transform.process(self)
 
 	def fetch(self):
 		try:

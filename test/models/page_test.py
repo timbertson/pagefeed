@@ -66,18 +66,14 @@ class PageTest(TestCase):
 		filters = [filter1.raw, filter2.raw]
 
 		p = page.Page(owner=a_user, url='http://sub.localhost.com/some/path/to/file.html')
-		initial_soup = mock_on(page.Page).soup
-		intermediate_soup = mock('initial_soup')
-		final_soup = mock('final_soup')
+		response = mock('response').with_children(status_code=200, content='initial content')
+		mock_on(page).fetch.returning(response.raw)
 
 		mock_on(Transform).find_all_for_user_and_host.with_(a_user, 'sub.localhost.com').is_expected.returning(filters)
-		filter1.expects('apply').with_(initial_soup.raw).returning(intermediate_soup.raw)
-		filter2.expects('apply').with_(intermediate_soup.raw).returning(final_soup.raw)
-		final_soup.expects('__str__').returning('final content')
+		filter1.expects('apply').with_(p)
+		filter2.expects('apply').with_(p)
 		
-		mock_on(page).fetch.returning(mock('fetched page').with_children(status_code=200, content='some stuff').raw)
 		p.put()
-		self.assertEqual(p.content, 'final content')
 
 	def test_should_fetch_content_from_new_url(self):
 		old_url = 'http://old_url'
