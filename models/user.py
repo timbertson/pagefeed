@@ -1,6 +1,7 @@
 from google.appengine.ext import db
+from base import BaseModel
 
-class UserID(db.Model):
+class UserID(BaseModel):
 	user = db
 	email = db.EmailProperty(required=True)
 	handle = db.IntegerProperty(required=True)

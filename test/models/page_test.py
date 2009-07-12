@@ -91,7 +91,7 @@ class PageTest(TestCase):
 	@ignore
 	def test_should_extract_xpath_elements(self):
 		pass
-
+	
 	def test_should_note_an_error_when_download_fails(self):
 		stub_result('', status_code = 400)
 		p = new_page()

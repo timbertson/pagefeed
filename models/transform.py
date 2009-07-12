@@ -2,11 +2,12 @@ from google.appengine.ext import db
 
 from logging import debug, info, warning
 from helpers import view
+from base import BaseModel
 
 class ActionProperty(db.StringProperty):
 	pass # don't do validation for now
 
-class Transform(db.Model):
+class Transform(BaseModel):
 	host_match = db.TextProperty(required=True)
 	action = ActionProperty()
 	selector = db.StringProperty()

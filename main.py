@@ -4,6 +4,7 @@ import logging
 import wsgiref.handlers
 from google.appengine.ext import webapp
 from google.appengine.api import users
+from migrate import MigrateHandler
 
 from controllers import *
 
@@ -14,6 +15,7 @@ application = webapp.WSGIApplication([
 		('/page/del/', PageDeleteHandler),
 		# ('/transform/', TransformHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
+		(r'/migrate/([^/]+)/?', MigrateHandler),
 		], debug=True)
 
 def main():

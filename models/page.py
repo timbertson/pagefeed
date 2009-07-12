@@ -6,10 +6,13 @@ from helpers import render, view, host_for_url
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
 from transform import Transform
+from base import BaseModel
 
 DEFAULT_TITLE = '[pagefeed saved item]'
 
 import re
+
+MESSAGE_TYPES = ['error', 'info']
 
 class Unparseable(ValueError):
 	pass
@@ -41,13 +44,14 @@ dodgy_regexes = (
 		replacement='\\1'),
 	)
 
-class Page(db.Model):
+class Page(BaseModel):
 	url = db.URLProperty(required=True)
 	content = db.TextProperty()
 	title = db.StringProperty()
 	error = db.TextProperty()
 	owner = db.UserProperty(required=True)
 	date = db.DateTimeProperty(auto_now_add=True)
+	_messages = db.StringListProperty()
 
 	def __init__(self, *a, **k):
 		super(type(self), self).__init__(*a, **k)
@@ -70,7 +74,6 @@ class Page(db.Model):
 		return content
 	
 	def populate_content(self, raw_content):
-		self.error = None
 		try:
 			soup = self._parse_content(raw_content)
 			self.content = self._get_body(soup)
@@ -112,7 +115,7 @@ class Page(db.Model):
 			except HTMLParseError, e:
 				if first_err is None:
 					first_err = e
-				error("parsing (with %s) failed: %s" % (parse_method, e))
+				self.info("parsing (with %s) failed: %s" % (parse_method, e))
 				continue
 		raise Unparseable(str(first_err))
 
@@ -128,20 +131,23 @@ class Page(db.Model):
 	def _failed(self, error, content):
 		debug("error: %s" % (error,))
 		self.title = DEFAULT_TITLE
-		self.error = error
+		self.error(error)
 		self.content = content
 	
 	def replace_url(self, new_url):
-		self.content = None
+		orig_url = self.url
+		self._reset()
+		self.info("original url: " % (orig_url,))
 		self.url = new_url
 		self.put()
 	
 	def update(self):
-		if self.error is not None:
+		if self.errors:
 			info("page %s had an error - redownloading...." % (self.url,))
+			self.reset()
 			self.fetch()
 			self.save()
-			if self.error is None:
+			if not self.errors:
 				info("page %s retrieved successfully!" % (self.url,))
 	
 	def put(self, *a, **k):
@@ -158,7 +164,7 @@ class Page(db.Model):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
 	
 	def as_html(self):
-		return render('page.html', {'page':self, 'error': self.error is not None})
+		return render('page.html', {'page':self, 'error': self.errors})
 	html = property(as_html)
 	
 	def _get_host(self):
@@ -166,7 +172,7 @@ class Page(db.Model):
 	host = property(_get_host)
 	
 	def _get_soup(self):
-		if self.error:
+		if self.errors:
 			return None
 		return BeautifulSoup(self.content)
 	soup = property(_get_soup)
@@ -178,5 +184,27 @@ class Page(db.Model):
 		base = '/'.join(base_parts) + '/'
 		return base
 	base_href = property(_get_base_href)
+	
+	def _add_msg(self, type_, msg):
+		assert type_ in MESSAGE_TYPES
+		self.messages.append("%s %s" % (type_, msg))
+	
+	def _reset(self):
+		self.content = None
+		self.messages = []
+		self.error = False
 
+	def _get_messages(self):
+		return [msg.split(' ', 1) for msg in self._messages]
+	messages = property(_get_messages)
+	
+	def messages_html(self):
+		return render('page_messages.html', {'page': self})
+	
+	def _get_errors(self):
+		return filter(lambda msg: msg[0] == 'error', self.messages)
+	errors = property(_get_errors)
+		
+	def error(self, msg): error(msg); self._add_msg('error', msg)
+	def info(self, msg):  info(msg); self._add_msg('info', msg)
 
