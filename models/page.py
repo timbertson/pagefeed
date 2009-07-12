@@ -5,7 +5,7 @@ from helpers import render, view, host_for_url
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
-from transform import Transform
+from transform import Transform, TransformError
 from base import BaseModel
 import page_parser as parser
 
@@ -44,7 +44,10 @@ class Page(BaseModel):
 			self.apply_transforms()
 
 	def apply_transforms(self):
-		Transform.process(self)
+		try:
+			Transform.process(self)
+		except TransformError, e:
+			self.error(str(e))
 
 	def fetch(self):
 		try:
@@ -62,8 +65,9 @@ class Page(BaseModel):
 		self.content = content
 	
 	def replace_with_contents_from(self, new_url):
-		self._reset()
+		self._reset_content()
 		debug("replacing page %s with %s" % (self.url, new_url))
+		self.info("replacing contents from URL: %s" % (new_url,))
 		self._content_url = new_url
 		self.put()
 	
@@ -118,11 +122,14 @@ class Page(BaseModel):
 		assert type_ in MESSAGE_TYPES
 		self._messages.append("%s %s" % (type_, msg))
 	
-	def _reset(self):
+	def _reset_content(self):
 		self.content = None
 		self._content_url = None
-		self.transformed = False
 		self._messages = []
+	
+	def _reset(self):
+		self._reset_content()
+		self.transformed = False
 
 	def _get_messages(self):
 		return [msg.split(' ', 1) for msg in self._messages]
