@@ -47,7 +47,7 @@ a.fresh:visited { color: #25d }
 }
 
 dl {
-	max-width:500px;
+	max-width:600;
 	margin:0.5em 0;
 }
 
@@ -69,9 +69,11 @@ dl dd {
 	margin:0;
 	padding: 4px 1em;
 	margin-bottom:0.5em;
+}
+
+.url {
 	white-space:nowrap;
 	overflow:hidden;
-	max-width:500px;
 }
 
 .footer {
@@ -83,4 +85,38 @@ dl dd {
 	margin-top:3em;
 	margin-bottom:2em;
 	text-align:center;
+}
+
+.page_messages {
+	font-size:0.8em;
+	margin:0.5em 0;
+	padding:0;
+	border: 2px solid #988;
+	opacity:0.7;
+}
+
+.page_messages li{
+	margin:0;
+	padding:2px;
+	list-style-type: none;
+	border-top: 1px solid #baa;
+}
+.page_messages li:first-child{
+	border-top:none
+}
+
+.page_messages .error{
+	background:#f9A;
+	color:#800;
+}
+.page_messages .info:before{
+	content: "info: "
+}
+
+.page_messages .error:before{
+	content: "ERROR: "
+}
+.page_messages .info{
+	background:#Fea;
+	color:#860;
 }

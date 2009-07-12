@@ -1,7 +1,8 @@
-<h4>PageFeed could not understand the contents of <a href="{{page.url|escape}}">{{page.url|escape}}</a>:</h4>
+<h4>PageFeed could not understand the contents of:<br /><a href="{{page.url|escape}}">{{page.url|escape}}</a></h4>
 
-<pre>{{page.error|escape}}</pre>
+{{page.message_html}}
 
+<br />
 <p>
 	note: the page link (and whatever content was downloaded) was still saved in your RSS feed for later reference
 </p>

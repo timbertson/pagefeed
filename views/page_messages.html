@@ -1,0 +1,7 @@
+{% if page.messages %}
+	<ol class="page_messages">
+		{% for message in page.messages %}
+			<li class="{{message.0|escape}}">{{message.1|escape}}</li>
+		{% endfor %}
+	</ol>
+{% endif %}

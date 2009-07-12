@@ -80,7 +80,7 @@ class Page(BaseModel):
 			self.title = self._get_title(soup)
 		except Unparseable, e:
 			safe_content = ascii(raw_content)
-			self._failed(str(e), safe_content)
+			self._failed("failed to parse content", safe_content)
 			return
 		if self.transformed:
 			return
@@ -106,18 +106,17 @@ class Page(BaseModel):
 			unicode_cleansed,
 			ascii_cleansed)
 	
-	@classmethod
-	def _parse_content(cls, raw_content):
+	def _parse_content(self, raw_content):
 		first_err = None
-		for parse_method in cls._parse_methods():
+		for parse_method in self._parse_methods():
 			try:
 				return parse_method(raw_content)
 			except HTMLParseError, e:
 				if first_err is None:
 					first_err = e
-				self.info("parsing (with %s) failed: %s" % (parse_method, e))
+				self.info("parsing (%s) failed: %s" % (parse_method.__name__, e))
 				continue
-		raise Unparseable(str(first_err))
+		raise Unparseable()
 
 	def fetch(self):
 		try:
@@ -137,16 +136,15 @@ class Page(BaseModel):
 	def replace_url(self, new_url):
 		orig_url = self.url
 		self._reset()
-		self.info("original url: " % (orig_url,))
+		self.info("original url: %s" % (orig_url,))
 		self.url = new_url
 		self.put()
 	
 	def update(self):
 		if self.errors:
 			info("page %s had an error - redownloading...." % (self.url,))
-			self.reset()
-			self.fetch()
-			self.save()
+			self._reset()
+			self.put()
 			if not self.errors:
 				info("page %s retrieved successfully!" % (self.url,))
 	
@@ -187,18 +185,19 @@ class Page(BaseModel):
 	
 	def _add_msg(self, type_, msg):
 		assert type_ in MESSAGE_TYPES
-		self.messages.append("%s %s" % (type_, msg))
+		self._messages.append("%s %s" % (type_, msg))
+		debug("messages are now: " + "\n".join(self._messages))
 	
 	def _reset(self):
 		self.content = None
-		self.messages = []
-		self.error = False
+		self._messages = []
 
 	def _get_messages(self):
+		info(self._messages)
 		return [msg.split(' ', 1) for msg in self._messages]
 	messages = property(_get_messages)
 	
-	def messages_html(self):
+	def message_html(self):
 		return render('page_messages.html', {'page': self})
 	
 	def _get_errors(self):

@@ -4,3 +4,10 @@
 
 <base href="{{ page.base_href|escape }}" />
 {{ page.content }}
+
+{% if page.messages %}
+	<p>&nbsp;</p>
+	<hr />
+	<p><em>Note: </em> the following messages were recorded while processing this page:</p>
+	{{ page.message_html }}
+{% endif %}

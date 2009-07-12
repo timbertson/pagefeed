@@ -16,14 +16,14 @@ class PageTest(TestCase):
 		p = new_page(url=url)
 		self.assertEqual(p.title, 'the title!')
 		self.assertEqual(p.content, '<body>the body!</body>')
-		self.assertFalse(p.error)
+		self.assertFalse(p.errors)
 	
 	def test_should_fall_back_to_a_default_title(self):
 		stub_result("<html><body>no title...</body></html>")
 		p = new_page()
 		self.assertEqual(p.title, page.DEFAULT_TITLE)
 		self.assertTrue("no title..." in p.content)
-		self.assertFalse(p.error)
+		self.assertFalse(p.errors)
 
 	def test_should_fall_back_to_the_whole_html_if_it_has_no_body(self):
 		html = "<html><title>no body</title></html>"
@@ -31,7 +31,7 @@ class PageTest(TestCase):
 		p = new_page()
 		self.assertEqual(p.title, 'no body')
 		self.assertEqual(p.content, html)
-		self.assertFalse(p.error)
+		self.assertFalse(p.errors)
 
 	def test_should_try_stripping_out_script_tags_on_unparseable(self):
 		html = """<html>
@@ -42,7 +42,7 @@ class PageTest(TestCase):
 		stub_result(html)
 		p = new_page()
 		self.assertEqual(p.content, u'<body>caf\xe9</body>') # correctly unicode'd
-		self.assertFalse(p.error)
+		self.assertFalse(p.errors)
 
 	def test_should_just_use_ascii_converted_html_on_completely_unparseable(self):
 		ascii_html = "<html></scr + ipt>"
@@ -51,14 +51,14 @@ class PageTest(TestCase):
 		p = new_page()
 		self.assertEqual(p.title, page.DEFAULT_TITLE)
 		self.assertEqual(p.content, ascii_html)
-		self.assertTrue(p.error)
+		self.assertTrue(p.errors)
 	
 	def test_should_strip_out_script_and_style_and_link_tags(self):
 		html = "<html><body><script></script><style></style><link /></body>"
 		stub_result(html)
 		p = new_page()
 		self.assertEqual(p.content, "<body></body>")
-		self.assertFalse(p.error)
+		self.assertFalse(p.errors)
 	
 	def test_should_apply_all_matching_transforms(self):
 		filter1 = mock('filter1')
@@ -95,7 +95,7 @@ class PageTest(TestCase):
 	def test_should_note_an_error_when_download_fails(self):
 		stub_result('', status_code = 400)
 		p = new_page()
-		self.assertTrue(p.error)
+		self.assertTrue(p.errors)
 
 	def test_should_retry_a_failed_download_on_update(self):
 		stub_result('', status_code=404)

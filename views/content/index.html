@@ -9,7 +9,11 @@
 				</form>
 				<a href="{{page.url|escape}}">{{page.title}}</a>
 			</dt>
-			<dd>{{page.url|escape}}</dd>
+			<dd>
+				<div class="url">{{page.url|escape}}</div>
+				{{ page.message_html }}
+			</dd>
+			
 		{% endfor %}
 	{% else %}
 		<p>No links saved ... (yet!)</p>

@@ -14,7 +14,8 @@ class PageAddTest(TestCase):
 		mock_on(page).fetch.returning(mock_page.raw).is_expected.with_(url)
 
 		response = self.add(url)
-		self.assertFalse(page.Page.find(fixtures.a_user, url).error)
+		self.assertFalse(page.Page.find(fixtures.a_user, url).errors)
+		print response.body
 		response.follow().mustcontain('Welcome')
 		self.assertEqual(response.follow().request.url, fixtures.app_root)
 
@@ -24,7 +25,7 @@ class PageAddTest(TestCase):
 		mock_on(page).fetch.returning(mock_page.raw).is_expected.with_(url)
 
 		response = self.add(url)
-		self.assertTrue(page.Page.find(fixtures.a_user, url).error)
+		self.assertEqual(len(page.Page.find(fixtures.a_user, url).errors), 1)
 
 		response.mustcontain('error')
 
