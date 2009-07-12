@@ -17,6 +17,32 @@ class PageTest(TestCase):
 		self.assertEqual(p.title, 'the title!')
 		self.assertEqual(p.content, '<body>the body!</body>')
 		self.assertFalse(p.errors)
+
+	def test_should_absoluteize_links_and_images(self):
+		content = """
+			<html>
+			<title>the title!</title>
+			<body>
+				<a href="rel.html">rel</a>
+				<a href="/path/to/pathed.html">pathed</a>
+				<a href="http://google.com/abs.html">abs</a>
+				<img src="/path/to/path2.jpg" />
+			</body>
+			</html>
+			"""
+		result = mock('result').with_children(status_code=200, content=content)
+		url =      'http://localhost/some/path/to_page.html'
+		rel_base = "http://localhost/some/path/"
+		base =     "http://localhost/"
+		mock_on(page).fetch.is_expected.with_(url).returning(result.raw)
+		
+		p = new_page(url=url)
+		self.assertFalse(p.errors)
+		print p.content
+		self.assertTrue('<a href="%srel.html">' % rel_base in p.content)
+		self.assertTrue('<a href="%spath/to/pathed.html">' % base in p.content)
+		self.assertTrue('<a href="http://google.com/abs.html">' in p.content)
+		self.assertTrue('<img src="%spath/to/path2.jpg" />' % base in p.content)
 	
 	def test_should_fall_back_to_a_default_title(self):
 		stub_result("<html><body>no title...</body></html>")

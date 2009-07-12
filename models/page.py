@@ -30,7 +30,7 @@ class Page(BaseModel):
 
 	def populate_content(self, raw_content):
 		try:
-			page = parser.parse(raw_content, notify=self.info)
+			page = parser.parse(raw_content, self.base_href, notify=self.info)
 			self.content = parser.get_body(page)
 			self.title = parser.get_title(page) or DEFAULT_TITLE
 		except parser.Unparseable, e:
