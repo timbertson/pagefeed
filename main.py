@@ -15,7 +15,7 @@ application = webapp.WSGIApplication([
 		('/page/del/', PageDeleteHandler),
 		# ('/transform/', TransformHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
-		(r'/migrate/([^/]+)/?', MigrateHandler),
+		(r'/migrate/(?:([^/]+)/?)?', MigrateHandler),
 		], debug=True)
 
 def main():

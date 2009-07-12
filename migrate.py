@@ -9,11 +9,19 @@ class MigrateHandler(webapp.RequestHandler):
 		logging.info(msg)
 		self.response.out.write(cgi.escape(msg) + "\n")
 
-	def get(self, model):
+	def get(self, model=None):
 		assert users.is_current_user_admin()
 		self.response.out.write("<pre>")
-		self.write("migrating model \"%s\"" % (model,))
-		migrations = self.migrations_for[model]
+		if model is None:
+			migrations = []
+			for migration_set in self.migrations_for.values():
+				migrations.extend(migration_set)
+		else:
+			self.write("migrating model \"%s\"" % (model,))
+			migrations = self.migrations_for[model]
+		self._apply_migrations(migrations)
+		
+	def _apply_migrations(self, migrations):
 		self.current_version = 0
 		for migration in migrations:
 			self.current_version += 1
