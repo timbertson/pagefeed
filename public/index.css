@@ -49,7 +49,7 @@ a.fresh:visited { color: #25d }
 #links h3{
 	background:#f0f0f0;
 	margin:0;
-	padding:0;
+	padding:0.2em;
 	font-size: 1.2em;
 	font-weight:normal;
 }
@@ -69,7 +69,7 @@ li {
 #links form {
 	display:inline;
 	position:relative;
-	float:left;
+	float:right;
 	bottom:0.1em;
 }
 
@@ -79,10 +79,10 @@ li {
 	overflow:hidden;
 }
 
-#links .url {
-	margin:0;
-	padding: 4px 1em;
-	margin-bottom:0.5em;
+#links .description {
+	margin:0.3em 0 0.1em;
+	padding: 0 1em;
+	color:#555;
 }
 
 

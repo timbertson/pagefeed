@@ -20,8 +20,10 @@
 					<input type="hidden" name="meth" value="replace" />
 				</form>
 				<h3><a href="{{page.url|escape}}">{{page.title}}</a></h3>
-				<div class="url">{{page.url|escape}}</div>
-				{{ page.message_html }}
+				<div class="description">
+					<div class="url">{{page.url|escape}}</div>
+					{{ page.message_html }}
+				</div>
 			</dd>
 		</li>
 			
