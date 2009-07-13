@@ -9,7 +9,11 @@
 	<a href="javascript:{{bookmarklet|escape}}" class="fresh">pagefeed</a> (drag it somewhere and click it later!)
 </p>
 
-<form action="/page/" method="POST" class="add_url">
+<form action="/page/" method="POST" class="add_url ajax">
 	<input type="text" size="60" name="url" id="url" />
 	<input type="submit" value="add link" />
+	
+	<!-- ajax properties -->
+	<input type="hidden" name="dest" value="#links" />
+	<input type="hidden" name="meth" value="before" />
 </form>

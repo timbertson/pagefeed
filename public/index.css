@@ -46,35 +46,45 @@ a.fresh:visited { color: #25d }
 	padding-bottom: 1em;
 }
 
-dl {
-	max-width:600;
-	margin:0.5em 0;
+#links h3{
+	background:#f0f0f0;
+	margin:0;
+	padding:0;
+	font-size: 1.2em;
+	font-weight:normal;
 }
 
-dl form {
+ul {
+	margin:0; padding:0;
+}
+
+li {
+	max-width:600;
+	margin:0.5em 0;
+	background:#e7e7e7;
+	padding:0.2em;
+	list-style-type:none;
+}
+
+#links form {
 	display:inline;
 	position:relative;
+	float:left;
 	bottom:0.1em;
 }
 
-dl dt {
-	background:#f0f0f0;
-	font-size: 1.2em;
-	font-weight:normal;
-	padding:0.2em;
+.url {
+	clear:both;
+	white-space:nowrap;
+	overflow:hidden;
 }
 
-dl dd {
-	background:#e7e7e7;
+#links .url {
 	margin:0;
 	padding: 4px 1em;
 	margin-bottom:0.5em;
 }
 
-.url {
-	white-space:nowrap;
-	overflow:hidden;
-}
 
 .footer {
 	opacity:0.5;
