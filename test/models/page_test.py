@@ -59,16 +59,6 @@ class PageTest(TestCase):
 		self.assertEqual(p.content, html)
 		self.assertFalse(p.errors)
 
-	def test_should_try_stripping_out_script_tags_on_unparseable(self):
-		html = """<html>
-			<script>
-				</scr + ipt>
-			</script>
-			<body>caf\xc3\xa9</body>""" # note the utf-8 "acute accented e"
-		stub_result(html)
-		p = new_page()
-		self.assertEqual(p.content, u'<body>caf\xe9</body>') # correctly unicode'd
-		self.assertFalse(p.errors)
 
 	def test_should_just_use_ascii_converted_html_on_completely_unparseable(self):
 		ascii_html = "<html></scr + ipt>"
@@ -175,6 +165,7 @@ class PageTest(TestCase):
 	def test_should_accept_multiline_titles(self):
 		p = new_page("<title>foo\nbar</title>")
 		self.assertEqual(p.title, "foo bar")
+
 
 def new_page(content=None, url='http://localhost/dontcare'):
 	p = page.Page(url=url, owner=a_user)

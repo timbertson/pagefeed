@@ -36,6 +36,10 @@ class Replacement(object):
 		self.replacement = replacement
 	
 	def apply(self, content):
+#		# useful for debugging:
+#		try:
+#			print self. desc + ':' + str(self.regex.findall(content))
+#		except RuntimeError: pass
 		return self.regex.sub(self.replacement, content)
 
 def beautiful_soup(content, base_href):
@@ -69,10 +73,20 @@ dodgy_regexes = (
 	Replacement('javascript',
 		regex=re.compile('<script.*?</script[^>]*>', re.DOTALL | re.IGNORECASE),
 		replacement=''),
+
 	Replacement('double double-quoted attributes',
 		regex=re.compile('(="[^"]+")"+'),
 		replacement='\\1'),
+
+	Replacement('unclosed tags',
+		regex = re.compile('(<[a-zA-Z]+[^>]*)(<[a-zA-Z]+[^<>]*>)'),
+		replacement='\\1>\\2'),
+
+	Replacement('unclosed (numerical) attribute values',
+		regex = re.compile('(<[^>]*[a-zA-Z]+\s*=\s*"[0-9]+)( [a-zA-Z]+="\w+"|/?>)'),
+		replacement='\\1"\\2'),
 	)
+	
 
 # helpers for parsing
 def normalize_spaces(s):
