@@ -17,6 +17,18 @@ class PageTest(TestCase):
 		self.assertEqual(p.title, 'the title!')
 		self.assertEqual(p.content, '<body>the body!</body>')
 		self.assertFalse(p.errors)
+		
+	def test_should_omit_page_fragment_from_request(self):
+		result = mock('result').with_children(status_code=200, content='blah')
+		url = 'http://localhost/some/path'
+		full_url = url + "#anchor"
+		mock_on(page).fetch.is_expected.with_(url).returning(result.raw)
+		
+		p = new_page(url=full_url)
+		self.assertEqual(p.url, full_url)
+		self.assertEqual(p.content, 'blah')
+		self.assertFalse(p.errors)
+		
 
 	def test_should_absoluteize_links_and_images(self):
 		content = """

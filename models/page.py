@@ -105,7 +105,8 @@ class Page(BaseModel):
 	soup = property(_get_soup)
 	
 	def _get_content_url(self):
-		return self._content_url or self.url
+		url = self._content_url or self.url
+		return url.split("#", 1)[0]
 	content_url = property(_get_content_url)
 	
 	def _get_base_href(self):
