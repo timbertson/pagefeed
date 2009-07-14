@@ -20,7 +20,7 @@ def host_for_url(url):
 def render(*args):
 	"""render(dir, [dir, [ ... ]], values)"""
 	if len(args) < 2:
-		raise ArgumentError("at least 2 args required")
+		raise TypeError("at least 2 args required")
 	template_path = view(*(args[:-1]))
 	values = args[-1]
 	content = template.render(template_path, values)

@@ -16,6 +16,7 @@ class PageDeleteTest(TestCase):
 		mock_on(page).delete.is_expected
 
 		response = self.delete(url)
+		print "content: %s" % (response.body,)
 		self.assertEqual(response.follow().request.url, fixtures.app_root)
 
 	def test_should_not_return_404_if_there_is_no_such_url(self):

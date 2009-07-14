@@ -148,8 +148,7 @@ class PageTest(TestCase):
 	def test_should_render_as_html(self):
 		url = 'http://my_url/base_path/resource'
 		p = new_page('<title>t</title><body>b</body>', url=url)
-		self.assertEqual(p.html.strip(),
-			'<base href="http://my_url/base_path/" />\n<body>b</body>')
+		self.assertEqual(p.html.strip(), '<body>b</body>')
 
 	def test_should_render_as_html_with_errors(self):
 		url = 'http://my_url'

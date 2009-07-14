@@ -53,6 +53,12 @@ a.fresh:visited { color: #25d }
 	padding-bottom: 1em;
 }
 
+.toggleButton {
+	float:right;
+	color:#BBB;
+	cursor:pointer;
+}
+
 #links h3{
 	background:#f0f0f0;
 	margin:0;
@@ -81,7 +87,7 @@ li {
 }
 
 .url {
-	clear:both;
+/*	clear:left;*/
 	white-space:nowrap;
 	overflow:hidden;
 }
@@ -136,4 +142,11 @@ li {
 .page_messages .info{
 	background:#Fea;
 	color:#860;
+}
+
+.startHidden {
+	display:none;
+}
+.ui-dialog-content .startHidden {
+	display:inherit;
 }

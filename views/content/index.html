@@ -2,33 +2,9 @@
 <ul id="links">
 	{% if pages %}
 		{% for page in pages %}
-			<li>
-				<form action="/page/del/" method="POST" class="del ajax">
-					<input type="hidden" name="url" value="{{page.url|escape}}" />
-					<input type="submit" value="X" />
-
-					<!-- ajax properties -->
-					<input type="hidden" name="dest" value="li" />
-					<input type="hidden" name="meth" value="remove" />
-				</form>
-				<form action="/page/update/" method="POST" class="update ajax">
-					<input type="hidden" name="url" value="{{page.url|escape}}" />
-					<input type="submit" value="R" />
-
-					<!-- ajax properties -->
-					<input type="hidden" name="dest" value="li" />
-					<input type="hidden" name="meth" value="replace" />
-				</form>
-				<h3><a href="{{page.url|escape}}">{{page.title}}</a></h3>
-				<div class="description">
-					<div class="url">{{page.url|escape}}</div>
-					{{ page.message_html }}
-				</div>
-			</dd>
-		</li>
-			
+			{% include "../snippets/page_summary.html" %}
 		{% endfor %}
 	{% else %}
-		<p>No links saved ... (yet!)</p>
+		<p class="placeholder">No links saved ... (yet!)</p>
 	{% endif %}
 </dl>

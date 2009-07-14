@@ -35,3 +35,6 @@ class BaseHandler(webapp.RequestHandler):
 	def uri(self):
 		return self.request.uri.split('?')[0]
 	
+	def is_ajax(self):
+		return bool(self.request.get('ajax'))
+	

@@ -1,0 +1,23 @@
+<li>
+	<form action="/page/del/" method="POST" class="del ajax">
+		<input type="hidden" name="url" value="{{page.url|escape}}" />
+		<input type="submit" value="X" />
+
+		<!-- ajax properties -->
+		<input type="hidden" name="dest" value="li" />
+		<input type="hidden" name="meth" value="remove" />
+	</form>
+	<form action="/page/update/" method="POST" class="update ajax">
+		<input type="hidden" name="url" value="{{page.url|escape}}" />
+		<input type="submit" value="R" />
+
+		<!-- ajax properties -->
+		<input type="hidden" name="dest" value="li" />
+		<input type="hidden" name="meth" value="replace" />
+	</form>
+	<h3><a href="{{page.url|escape}}">{{page.title}}</a></h3>
+	<div class="description toggleContainer">
+		<div class="url">{{page.url|escape}}</div>
+		{{ page.message_html }}
+	</div>
+</li>

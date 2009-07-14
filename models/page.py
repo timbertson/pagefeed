@@ -53,7 +53,8 @@ class Page(BaseModel):
 		try:
 			response = fetch(self.content_url)
 			if response.status_code >= 400:
-				raise DownloadError("request returned status code %s\n%s" % (response.status_code, response.content))
+				warning("request returned status code %s\n%s" % (response.status_code, response.content))
+				raise DownloadError("request returned status code %s" % (response.status_code,))
 			self.populate_content(response.content)
 		except DownloadError, e:
 			self._failed(str(e), 'no content was downloaded')
@@ -91,7 +92,7 @@ class Page(BaseModel):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
 	
 	def as_html(self):
-		return render('page.html', {'page':self, 'error': self.errors})
+		return render('snippets/page_content.html', {'page':self, 'error': self.errors})
 	html = property(as_html)
 	
 	def _get_host(self):

@@ -7,7 +7,7 @@ class MainHandler(BaseHandler):
 	def get(self):
 		user = self.user()
 		
-		bookmarklet_js = render('bookmarklet.js', {'host':host_for_url(self.uri())})
+		bookmarklet_js = render('snippets/bookmarklet.js', {'host':host_for_url(self.uri())})
 		bookmarklet_js.replace('\n', ' ')
 		template_values = {
 			'name': user.nickname(),
