@@ -2,16 +2,26 @@ var ajax_reqs = 0
 function pushAjax(elm) { ajax_reqs += 1; if(ajax_reqs == 1) throb(); }
 function popAjax(elm)  { ajax_reqs -= 1; if(ajax_reqs == 0) stopThrob(); }
 
-function throb() {   $("throb").show(100); }
+function throb() {     $("throb").show(100); }
 function stopThrob() { $("throb").hide(100); }
 
+var transition_speed = 1000; // 1 second
+
 function fadeRepace(elem, replacement) {
+	var fadeout_opacity = 0.2;
 	var replaceIt = function(){
-		replacement.css('opacity',0.5)
+		replacement.css('opacity',fadeout_opacity)
 		elem.replaceWith(replacement);
-		$(replacement).animate({'opacity':1, 'speed':500});
+		$(replacement).animate({'opacity':1, 'speed':transition_speed/2});
 	}
-	elem.animate({'opacity':0.5, 'speed':500}, "easeOutQuad", replaceIt);
+	elem.animate({'opacity':fadeout_opacity, 'speed':transition_speed/2}, "linear", replaceIt);
+}
+
+function markup(base) {
+	// apply all unobtrusive JS to an element tree
+	if (!base) { base = document.body; }
+	ajaxify(base);
+	makeToggles(base);
 }
 
 function ajaxify(base) {
@@ -22,7 +32,6 @@ function ajaxify(base) {
 			alert("already submitted!");
 			return false;
 		}
-		alert("submitting!");
 		ajaxFlag = $("<input name=\"ajax\" type=\"hidden\" value=\"true\" />", document)
 		frm.prepend(ajaxFlag);
 		pushAjax(frm);
@@ -37,9 +46,17 @@ function ajaxify(base) {
 			complete: function() { ajaxFlag.remove(); popAjax(frm); },
 			error: function(xhr, textStatus, err) {
 				alert("fail!");
+				$(err, document).dialog({
+					modal:True,
+					draggable: false,
+					hide: 'slide',
+					show: 'fade',
+					title: 'Error:'
+					resizeable: false,
+					dialogClass: 'dialog'
+				});
 			},
 			success: function(data, status) {
-				data = "<h2>TADA!</h2>"
 				console.log("Success!");
 				console.log(status);
 				console.log(data);
@@ -52,15 +69,15 @@ function ajaxify(base) {
 				console.log("target: " + target);
 				html = $(data, document);
 				console.log("html: " + html);
-				ajaxify(html);
+				markup(html);
 				meth = $("input[name=meth]", frm).val();
 				if(meth == "replace") {
 					fadeRepace(target, html);
 				} else if(meth == "remove") {
-					if(data.length > 0) {
+					if($.strip(data).length > 0) {
 						console.error("replacement HTML is nonzero: " + data);
 					}
-					target.hide(1000, function(){target.remove()});
+					target.hide(transition_speed, function(){target.remove()});
 				} else {
 					html.hide();
 					if(meth == "before"){
@@ -68,7 +85,7 @@ function ajaxify(base) {
 					} else {
 						target.append(html);
 					}
-					html.show(1000);
+					html.show(transition_speed);
 				}
 			},
 		});
@@ -77,4 +94,22 @@ function ajaxify(base) {
 	return "done"
 }
 
-$(function(){ajaxify()});
+function makeToggles(base) {
+	var toggleSelector = ".toggleContent";
+	$(toggleSelector).each(function(){
+		container = $(this).closest(".toggleContainer");
+		if(container.length == 0){
+			toggleButton = $("<img class=\"toggleButton\" src=\"public/toggle.gif\" />", document)
+			container.append(toggleButton);
+			toggleButton.click(function() {
+				$(toggleSelector, this).toggle(transition_speed);
+				return false;
+			});
+		}
+	})
+}
+
+document.write("<style> .startHidden { display: none; } </style>"); // hide toggleable content by default (but only if JS is enabled)
+
+$(function(){markup()});
+
