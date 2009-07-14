@@ -8,6 +8,13 @@ form {
 	margin:0;
 }
 
+.throb {
+	display:none; /* gets shown on request by javascript */
+	position:absolute;
+	top:0;
+	right:0;
+}
+
 p {
 	margin: 0.5em 0;
 }
