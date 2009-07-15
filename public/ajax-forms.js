@@ -2,8 +2,8 @@ var ajax_reqs = 0
 function pushAjax(elm) { ajax_reqs += 1; if(ajax_reqs == 1) throb(); }
 function popAjax(elm)  { ajax_reqs -= 1; if(ajax_reqs == 0) stopThrob(); }
 
-function throb() {     $("throb").fadeIn(100); }
-function stopThrob() { $("throb").fadeOut(100); }
+function throb() {     $(".throb").fadeIn(100); }
+function stopThrob() { $(".throb").fadeOut(100); }
 
 var transition_speed = 250; // 1/4 second
 
@@ -26,7 +26,7 @@ function markup(base) {
 
 function ajaxify(base) {
 	$("form.ajax", base).submit(function() {
-		frm = $(this);
+		var frm = $(this);
 		var ajax_flag = function(){ return $("input[name=ajax]", frm); }
 		if(ajax_flag.length > 0) {
 			alert("already submitted!");
@@ -77,7 +77,7 @@ function ajaxify(base) {
 				console.log("Success!");
 				var html = $(data, document);
 				markup(html);
-				
+				$("input[type=text]", frm).val(''); // reset form values
 				if(method == "replace") {
 					fadeRepace(target, html);
 				} else if(method == "remove") {

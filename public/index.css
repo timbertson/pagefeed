@@ -15,9 +15,12 @@ form {
 
 .throb {
 	display:none; /* gets shown on request by javascript */
-	position:absolute;
-	top:0;
-	right:0;
+	position:fixed;
+	width:32px;
+	height:32px;
+	background: url("/public/throb.gif") no-repeat top right;
+	top:5px;
+	right:5px;
 }
 
 p {
