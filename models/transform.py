@@ -47,8 +47,8 @@ class Transform(PolyModel, BaseModel):
 	@classmethod
 	def _monkeypatch_dzone(cls, page, transforms): #FIXME: !!!
 		if transforms: return transforms
-		dzone = 'www.dzone.com'
-		if page.host == dzone and users.is_current_user_admin():
+		dzone = 'dzone.com'
+		if page.host.endswith(dzone) and users.is_current_user_admin():
 			debug("monkeypatching dzone transformer...")
 			transforms = [FollowTransform(owner=page.owner, host_match=dzone)]
 		return transforms
