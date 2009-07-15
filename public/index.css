@@ -4,6 +4,11 @@ h1, h2 {
 	margin-top: 0.5em;
 }
 
+h1 {
+	font-size:1.7em;
+	margin-bottom: 0.5em;
+}
+
 form {
 	margin:0;
 }
@@ -48,9 +53,12 @@ a.fresh:visited { color: #25d }
 
 .header {
 	border-bottom-color: #ddd;
-	background:#ff9;
-	text-align:center;
+	min-height:160px;
+	background:#ff9 url('pagefeed-160.png') center left no-repeat;
+	text-align:left;
 	padding-bottom: 1em;
+	padding-top:1em;
+	padding-left: 220px;
 }
 
 .toggleButton {
