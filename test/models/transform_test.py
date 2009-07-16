@@ -9,7 +9,7 @@ class TransformTest(TestCase):
 			trans.delete()
 
 	def test_should_create_the_appropriate_model(self):
-		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user)
+		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user, name='blah')
 		orig_follow.put()
 		follows = transform.Transform.all().fetch(2)
 		self.assertEqual(len(follows), 1)
@@ -17,6 +17,7 @@ class TransformTest(TestCase):
 		self.assertEqual(type(follow), transform.FollowTransform)
 		self.assertEqual(follow.selector, 'foo')
 		self.assertEqual(follow.host_match, 'bar')
+		self.assertEqual(follow.name, 'blah')
 		self.assertEqual(follow.owner, fixtures.a_user)
 
 	@ignore
@@ -25,14 +26,14 @@ class TransformTest(TestCase):
 
 	@pending
 	def test_should_find_transforms_based_on_host_and_owner(self):
-		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user)
+		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user, name='foo')
 		follows = transform.Transform.find_all_for_user_and_host(fixtures.a_user, 'bar')
 		self.assertEqual(len(follows), 1)
 		assertEqual(orig_follow, follows[0])
 
 	def test_should_follow_url_for_follow_action(self):
 		selector = "div[class=content]|a[1]"
-		xform = transform.FollowTransform(owner=fixtures.a_user, selector=selector, host_match='localhost')
+		xform = transform.FollowTransform(owner=fixtures.a_user, selector=selector, host_match='localhost', name='blah')
 		html = """
 			<body>
 				<div class="content">

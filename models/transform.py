@@ -23,6 +23,7 @@ class Transform(PolyModel, BaseModel):
 	selector = db.StringProperty()
 	owner = db.UserProperty(required=True)
 	index = db.IntegerProperty()
+	name = db.StringProperty(required=True)
 	
 	@staticmethod
 	def create(action, **kwargs):
@@ -34,7 +35,7 @@ class Transform(PolyModel, BaseModel):
 	
 	@classmethod
 	def find_all_for_user_and_host(cls, owner, host):
-		return db.Query(cls).filter('owner =', owner).filter('host_match =', host).order('index').fetch(limit=50)
+		return db.Query(cls).filter('owner', owner).filter('host_match', host).order('index').fetch(limit=50)
 	
 	@classmethod
 	def apply_transform(cls, transform, page):
@@ -64,7 +65,7 @@ class Transform(PolyModel, BaseModel):
 
 
 class FollowTransform(Transform):
-	name = "follow link"
+	desc = "follow link"
 	def apply(self, page):
 		links = apply_selector(page.soup, self.selector)
 		if len(links) < 1:
@@ -74,13 +75,4 @@ class FollowTransform(Transform):
 		info("replacing with contents from: %s" % (url,))
 		page.replace_with_contents_from(url)
 
-class DeleteTransform(Transform):
-	name = "remove items"
-	def apply(self):
-		pass
-	
-class SelectTransform(Transform):
-	name = "select subsets of page"
-	def apply(self):
-		pass
-	
+
