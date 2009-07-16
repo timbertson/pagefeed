@@ -4,39 +4,58 @@ from google.appengine.api import users
 
 from pagefeed.test import fixtures
 
+
 class TransformAddTest(TestCase):
 	path = "/transform/"
+	default_opts = dict(owner=fixtures.a_user, host_match='localhost', selector='div[class=foo]', name="xform")
 	
 	def tearDown(self):
 		[t.delete() for t in transform.Transform.all()]
 
-	def add(self, **kwargs):
-		return fixtures.app().post(self.path + 'add/', kwargs)
+	def fill_in_form(self, form, d):
+		for k, v in d.items():
+			form.set(k, v)
+
+	def add(self, form=None, **kwargs):
+		if form is None:
+			form = self.get().forms['new_transform']
+		fill_in_form(form, kwargs)
+		self.assertEqual(form.method, 'POST')
+		self.assertEqual(form.action, self.path + 'add/')
+		return form.submit()
 
 	def get(self, **kwargs):
 		return fixtures.app().get(self.path)
 
-	def delete(self, key):
-		return fixtures.app().post(self.path + 'del/', {'key':key})
+	def delete(self, form):
+		fill_in_form(form, kwargs)
+		self.assertEqual(form.method, 'POST')
+		self.assertEqual(form.action, self.path + 'del/')
+		return form.submit()
 
 	@ignore
 	def test_should_add_a_transform_and_redirect_to_index(self):
-		sel = 'div[class=foo]'
-		kw = dict(owner=fixtures.a_user, host_match='localhost', selector=sel, name="xform")
+		kw = dict(owner=fixtures.a_user, host_match='localhost', selector='div[class=foo]', name="xform")
 		xform = mock('transform')
 		mock_on(transform.Transform).create.is_expected.with_(**kw).returning(xform)
 		response = self.add(**kw)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 
+	@ignore
+	def test_should_show_error_message_on_failure(self):
+		form = self.get().forms['new_transform']
+		response = form.submit(status=400)
+		response.mustcontain("Error:")
 
 	@ignore
 	def test_should_delete_a_transform_and_redirect_to_index(self):
-		xform = mock('transform')
-		key = '1234'
-		mock_on(transform.Transform).get.is_expected.with_(key).returning(xform)
-		xform.expects('delete')
-		
-		response = self.delete(key)
+		delete_form = self.add(**self.default_opts).follow().forms[1] # 0 is add, all others are delete
+		def num_transforms():
+			return len(transform.Transform.all().fetch(100))
+		self.assertEqual(num_transforms(), 1)
+
+		response = self.delete(delete_form)
+		self.assertEqual(num_transforms(), 0)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 
 	@ignore
