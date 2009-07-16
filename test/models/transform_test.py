@@ -1,13 +1,12 @@
 from pagefeed.test.helpers import *
-from models import Transform, transform
+from models import transform
 from pagefeed.lib.BeautifulSoup import BeautifulSoup as b_soup
 from pagefeed.test import fixtures
 
 class TransformTest(TestCase):
-	@ignore
 	def test_should_follow_url_for_follow_action(self):
 		selector = "div[class=content]|a[1]"
-		xform = Transform(owner=fixtures.a_user, action='follow', selector=selector, host_match='localhost')
+		xform = transform.FollowTransform(owner=fixtures.a_user, selector=selector, host_match='localhost')
 		html = """
 			<body>
 				<div class="content">
@@ -17,9 +16,9 @@ class TransformTest(TestCase):
 				</div>
 			</body>
 			"""
-		page = mock('page').with_children(soup=b_soup())
-		page.expects('replace_link').with_('http://linked_url')
-		xform.apply(page)
+		page = mock('page').with_children(soup=b_soup(html), host='')
+		page.expects('replace_with_contents_from').with_('http://linked_url')
+		xform.apply(page.raw)
 
 	@ignore
 	def test_should_not_follow_url_when_selection_fails(self):

@@ -1,5 +1,7 @@
 from os import path
 import logging
+from urlparse import urlparse
+
 from google.appengine.ext.webapp import template
 
 CONTENT = 'content'
@@ -10,12 +12,37 @@ def view(*parts):
 	return path.join(path.dirname(__file__), 'views', *parts)
 
 def host_for_url(url):
+	"""
+	> host_for_url('http://base/whatever/fdsh')
+	'base'
+	"""
 	try:
 		return url.split('/')[2]
 	except IndexError:
 		logging.error("could not extract host from URL: %r" % (url,))
 		return None
 
+def absolute_url(url, base_href):
+	"""
+	> absolute_url('foo', 'http://base/whatever/fdsh')
+	'http://base/whatever/foo'
+
+	> absolute_url('foo/bar/', 'http://base')
+	'http://base/foo/bar/'
+
+	> absolute_url('/foo/bar', 'http://base/whatever/fdskf')
+	'http://base/foo/bar'
+
+	> absolute_url('http://localhost/foo', 'http://base/whatever/fdskf')
+	'http://localhost/foo'
+	"""
+	proto = urlparse(url)[0]
+	if proto:
+		return url
+	elif url.startswith('/'):
+		return '://'.join(urlparse(base_href)[:2]) + url
+	else:
+		return base_href + url
 
 def render(*args):
 	"""render(dir, [dir, [ ... ]], values)"""

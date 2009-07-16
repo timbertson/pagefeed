@@ -9,6 +9,7 @@ class FeedTest(TestCase):
 	def get_feed(self, email, secret, **kwargs):
 		email = cgi.escape(str(email))
 		secret = cgi.escape(str(secret))
+		print repr(fixtures)
 		return fixtures.app().get('/feed/%s-%s/' % (secret, email), **kwargs)
 		
 	def test_should_display_feeds_for_a_user(self):

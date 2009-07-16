@@ -1,6 +1,5 @@
 import re
-from urlparse import urlparse
-
+from helpers import absolute_url
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 
 
@@ -47,22 +46,14 @@ def beautiful_soup(content, base_href):
 	_fix_references(soup, base_href)
 	return soup
 
-def _absolute_url(url, base_href):
-	proto = urlparse(url)[0]
-	if proto:
-		return url
-	elif url.startswith('/'):
-		return '://'.join(urlparse(base_href)[:2]) + url
-	else:
-		return base_href + url
 
 def _make_absolute_links(soup, base_href):
 	for link in soup.findAll('a', attrs={'href':True}):
-		link['href'] = _absolute_url(link['href'], base_href)
+		link['href'] = absolute_url(link['href'], base_href)
 
 def _make_absolute_images(soup, base_href):
 	for img in soup.findAll('img', attrs={'src':True}):
-		img['src'] = _absolute_url(img['src'], base_href)
+		img['src'] = absolute_url(img['src'], base_href)
 
 def _fix_references(soup, base_href):
 	_make_absolute_links(soup, base_href)
