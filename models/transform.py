@@ -24,6 +24,11 @@ class Transform(PolyModel, BaseModel):
 	owner = db.UserProperty(required=True)
 	index = db.IntegerProperty()
 	
+	@staticmethod
+	def create(action, **kwargs):
+		actionClasses = {'follow':FollowTransform}
+		return actionClasses[action](**kwargs)
+
 	def apply(self, soup):
 		pass
 	

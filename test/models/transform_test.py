@@ -1,9 +1,35 @@
 from pagefeed.test.helpers import *
-from models import transform
+from pagefeed.models import transform
 from pagefeed.lib.BeautifulSoup import BeautifulSoup as b_soup
 from pagefeed.test import fixtures
 
 class TransformTest(TestCase):
+	def tearDown(self):
+		for trans in transform.Transform.all():
+			trans.delete()
+
+	def test_should_create_the_appropriate_model(self):
+		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user)
+		orig_follow.put()
+		follows = transform.Transform.all().fetch(2)
+		self.assertEqual(len(follows), 1)
+		follow = follows[0]
+		self.assertEqual(type(follow), transform.FollowTransform)
+		self.assertEqual(follow.selector, 'foo')
+		self.assertEqual(follow.host_match, 'bar')
+		self.assertEqual(follow.owner, fixtures.a_user)
+
+	@ignore
+	def test_should_assign_index_automatically(self):
+		pass
+
+	@pending
+	def test_should_find_transforms_based_on_host_and_owner(self):
+		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user)
+		follows = transform.Transform.find_all_for_user_and_host(fixtures.a_user, 'bar')
+		self.assertEqual(len(follows), 1)
+		assertEqual(orig_follow, follows[0])
+
 	def test_should_follow_url_for_follow_action(self):
 		selector = "div[class=content]|a[1]"
 		xform = transform.FollowTransform(owner=fixtures.a_user, selector=selector, host_match='localhost')
@@ -41,7 +67,7 @@ class SelectorTest(TestCase):
 		soup = b_soup(content)
 		results = transform.apply_selector(soup, selector)
 		string_results = map(str, results)
-		self.assertEquals(string_results, expected_results)
+		self.assertEqual(string_results, expected_results)
 
 	def test_should_apply_a_complex_selector(self):
 		selector="div[class=the_class]|[0]|p[2],a"
