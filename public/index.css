@@ -161,3 +161,13 @@ li {
 .ui-dialog-content .startHidden {
 	display:inherit;
 }
+
+#sidebar {
+	float:right;
+	margin-top:30px;
+	text-align:right;
+	margin-right:5px;
+}
+#sidebar li {
+	background: none;
+}

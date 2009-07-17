@@ -11,10 +11,12 @@ from controllers import *
 application = webapp.WSGIApplication([
 		('/', MainHandler),
 		('/page/', PageHandler),
+		('/logout/', LogoutHandler),
 		('/page/bookmarklet/', PageBookmarkletHandler),
 		('/page/del/', PageDeleteHandler),
 		('/page/update/', PageUpdateHandler),
 		('/transform/', TransformHandler),
+		('/transform/del/', TransformDeleteHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
 		(r'/migrate/(?:([^/]+)/?)?', MigrateHandler),
 		], debug=True)

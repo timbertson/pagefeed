@@ -13,7 +13,6 @@ class MainHandler(BaseHandler):
 			'name': user.nickname(),
 			'pages': Page.find_all(user),
 			'feed_link': Feed.path_for(user),
-			'logout': users.create_logout_url('/'),
 			'bookmarklet': urllib2.quote(bookmarklet_js)
 		}
 		debug("template values: %r" % template_values)
