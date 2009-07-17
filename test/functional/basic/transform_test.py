@@ -21,7 +21,7 @@ class TransformAddTest(TestCase):
 			form = self.get().forms['new_transform']
 		fill_in_form(form, kwargs)
 		self.assertEqual(form.method, 'POST')
-		self.assertEqual(form.action, self.path + 'add/')
+		self.assertEqual(form.action, self.path)
 		return form.submit()
 
 	def get(self, **kwargs):
@@ -60,8 +60,27 @@ class TransformAddTest(TestCase):
 
 	@ignore
 	def test_should_update_an_existing_transform(self):
-		#TODO: transform editing
-		pass
+		edit_form = self.add(**self.default_opts).follow().forms[2] # 0 is add, all others are (delete, edit) pairs
+		for k,v in self.default_opts:
+			self.assertEqual(edit_form[k].value, v) #TODO: check webtest API
+		def transforms():
+			return transform.Transform.all().fetch(5)
+		all_xforms = transforms()
+		self.assertEqual(len(all_xforms), 1)
+
+		response = self.add(edit_form, name="the second name")
+		updated_xforms = transforms()
+		self.assertEqual(len(updated_xforms), 1)
+
+		# selector, etc should stay the same:
+		self.assertEqual(all_xforms[0].selector, updated_xforms[0].selector)
+
+		# but names should be different:
+		self.assertEqual(all_xforms[0].name, self.default_opts['name'])
+		self.assertEqual(updated_xforms[0].name, self.default_opts['the second name'])
+		
+		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
+
 
 	@ignore
 	def test_should_show_a_list_of_transforms(self):

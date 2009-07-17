@@ -24,10 +24,22 @@ class TransformTest(TestCase):
 	def test_should_assign_index_automatically(self):
 		pass
 
-	@pending
+	@ignore #TODO
+	def test_should_find_transforms_based_on_owner(self):
+		kw = dict(action='follow', selector='foo', name='foo')
+		transform.Transform.create(host_match='xyz', owner=fixtures.a_user, **kw).put()
+		transform.Transform.create(host_match='bar', owner=fixtures.a_user, **kw).put()
+
+		self.assertEqual(len(transform.Transform.find_all(user=fixtures.a_user)), 2)
+		self.assertEqual(len(transform.Transform.find_all(user=fixtures.another_user)), 0)
+
+	@ignore #TODO
 	def test_should_find_transforms_based_on_host_and_owner(self):
 		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user, name='foo')
-		follows = transform.Transform.find_all_for_user_and_host(fixtures.a_user, 'bar')
+		orig_follow.put()
+		
+		follows = transform.FollowTransform.find_all(user=fixtures.a_user, host='bar')
+		print repr(list(transform.FollowTransform.find_all(user=fixtures.a_user)))
 		self.assertEqual(len(follows), 1)
 		assertEqual(orig_follow, follows[0])
 

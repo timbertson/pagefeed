@@ -1,0 +1,10 @@
+<h2>Your transforms:</h2>
+<ul id="transforms">
+	{% if transforms %}
+		{% for transform in transforms %}
+			{% include "../snippets/transform.html" %}
+		{% endfor %}
+	{% else %}
+		<p class="placeholder">No transfroms created ... (yet!)</p>
+	{% endif %}
+</dl>

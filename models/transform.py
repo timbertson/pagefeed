@@ -20,7 +20,7 @@ class TransformError(RuntimeError):
 
 class Transform(PolyModel, BaseModel):
 	host_match = db.TextProperty(required=True)
-	selector = db.StringProperty()
+	selector = db.StringProperty(required=True)
 	owner = db.UserProperty(required=True)
 	index = db.IntegerProperty()
 	name = db.StringProperty(required=True)
@@ -34,9 +34,16 @@ class Transform(PolyModel, BaseModel):
 		pass
 	
 	@classmethod
-	def find_all_for_user_and_host(cls, owner, host):
-		return db.Query(cls).filter('owner', owner).filter('host_match', host).order('index').fetch(limit=50)
-	
+	def find_all(cls, user, host=None):
+		q = db.Query(cls).filter('owner', user)
+		if host is not None:
+			info("applying filter host = %s" % (host,))
+			q.filter('host_match', host)
+		else:
+			info("no host filter")
+		q.order('host_match')
+		return q.fetch(limit=50)
+
 	@classmethod
 	def apply_transform(cls, transform, page):
 		debug("applying transform %s to page at url: %s" % (transform, page.url))
@@ -50,7 +57,7 @@ class Transform(PolyModel, BaseModel):
 	
 	@classmethod
 	def process(cls, page):
-		transforms = cls.find_all_for_user_and_host(page.owner, page.host)
+		transforms = cls.find_all(user=page.owner, host=page.host)
 		transforms = cls._monkeypatch_dzone(page, transforms)
 		[cls.apply_transform(transform, page) for transform in transforms]
 	

@@ -1,0 +1,23 @@
+<li>
+	<form action="/transform/del/" method="POST" class="del ajax">
+		<input type="hidden" name="key" value="{{transform.key|escape}}" />
+		<input type="submit" value="X" />
+
+		<!-- ajax properties -->
+		<input type="hidden" name="dest" value="li" />
+		<input type="hidden" name="meth" value="remove" />
+	</form>
+	<form action="/transform/" method="POST" class="update ajax editable">
+		<label for="name_{{transform.key|escape}}">Name: </label><input type="text" id="name_{{transform.key|escape}}" name="name" value="{{transform.name|escape}}"/>
+		<label for="host_match_{{transform.key|escape}}">host: </label><input type="text" id="host_match_{{transform.key|escape}}" name="host_match" value="{{transform.host_match|escape}}"/>
+		<label for="selector_{{transform.key|escape}}">selector: </label><input type="text" id="selector_{{transform.key|escape}}" name="selector" value="{{transform.selector|escape}}"/>
+		<input type="hidden" name="key" value="{{transform.key|escape}}" />
+
+		<input type="submit" value="update" class="startHidden" />
+
+		<!-- ajax properties -->
+		<input type="hidden" name="dest" value="li" />
+		<input type="hidden" name="meth" value="replace" />
+	</form>
+</li>
+

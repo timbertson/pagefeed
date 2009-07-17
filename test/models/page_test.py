@@ -97,7 +97,7 @@ class PageTest(TestCase):
 		response = mock('response').with_children(status_code=200, content='initial content')
 		mock_on(page).fetch.returning(response.raw)
 
-		mock_on(Transform).find_all_for_user_and_host.with_(a_user, 'sub.localhost.com').is_expected.returning(filters)
+		mock_on(Transform).find_all.with_(user=a_user, host='sub.localhost.com').is_expected.returning(filters)
 		filter1.expects('apply').with_(p)
 		filter2.expects('apply').with_(p)
 		
