@@ -1,0 +1,16 @@
+<h1>Add a transform:</h1>
+<div>
+	<form action="/transform/" method="POST" class="update ajax">
+		<div>
+			<label for="name_new">Name: </label><input type="text" id="name_new" name="name" value=""/><br />
+			<label for="host_match_new">host: </label><input type="text" id="host_match_new" name="host_match" value=""/><br />
+			<label for="selector_new">selector: </label><input type="text" id="selector_new" name="selector" value=""/><br />
+
+			<input type="submit" value="add" />
+
+			<!-- ajax properties -->
+			<input type="hidden" name="dest" value="#transforms" />
+			<input type="hidden" name="meth" value="before" />
+		</div>
+	</form>
+</div>
