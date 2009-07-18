@@ -68,7 +68,14 @@ a.fresh:visited { color: #25d }
 	float:right;
 	color:#BBB;
 	cursor:pointer;
+	background: url('expando.png') center center no-repeat;
+	width: 18px;
+	height:18px;
+	position: relative;
+	left:10px;
+	opacity:0.7;
 }
+.toggleButton:hover { opacity:1.0; }
 
 #links h3{
 	background:#f0f0f0;

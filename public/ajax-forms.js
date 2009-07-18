@@ -105,14 +105,14 @@ function ajaxify(base) {
 
 function makeToggles(base) {
 	var toggleSelector = ".toggleContent";
-	$(toggleSelector).each(function(){
+	$(toggleSelector, base).each(function(){
 		var container = $(this).closest(".toggleContainer");
 		if (container.length == 0) {
 			console.log("no container for toggleContent!");
 			return;
 		}
 		if($(".toggleButton", container).length == 0){
-			var toggleButton = $("<div class=\"toggleButton\">[i]</div>", document);
+			var toggleButton = $("<div class=\"toggleButton\"></div>", document);
 			container.prepend(toggleButton);
 			toggleButton.click(function() {
 				$(toggleSelector, container).slideToggle(transition_speed);
