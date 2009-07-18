@@ -21,12 +21,11 @@ class Transform(PolyModel, BaseModel):
 	owner = db.UserProperty(required=True)
 	name = db.StringProperty(required=True)
 	
-	
-	required_properties = ('host_match', 'action', 'selector', 'owner', 'name')
+	required_properties = ('host_match', 'selector', 'owner', 'name')
 	
 	def put(self, *a, **k):
-		if type(self) == BaseModel:
-			raise TypeError("expected a subclass of BaseModel, got %s" % (BaseModel,))
+		if type(self) == Transform:
+			raise TypeError("expected a subclass of Transform, got Transform itself")
 		super(Transform, self).put(*a, **k)
 	
 	@classmethod

@@ -1,5 +1,5 @@
 from pagefeed.test.helpers import *
-from models import transform
+from models import transform, Transform
 from google.appengine.api import users
 
 from pagefeed.test import fixtures
@@ -28,16 +28,24 @@ class TransformAddTest(TestCase):
 		return fixtures.app().get(self.path)
 
 	def delete(self, form):
-		self.fill_in_form(form, kwargs)
 		self.assertEqual(form.method, 'POST')
 		self.assertEqual(form.action, self.path + 'del/')
 		return form.submit()
 
-	@ignore
+	def first_form(self, match, request):
+		for form in request.forms.values():
+			if form.id is not None and form.id.startswith(match):
+				return form
+		raise KeyError("no %r forms found in %r" % (match, [x.id for x in request.forms.values()]))
+
+
 	def test_should_add_a_transform_and_redirect_to_index(self):
 		kw = dict(host_match='localhost', selector='div[class=foo]', name="xform")
 		xform = mock('transform')
-		mock_on(transform.Transform).create.is_expected.with_(**kw).returning(xform)
+		create_params = kw.copy()
+		create_params['owner'] = fixtures.a_user
+		
+		mock_on(transform.Transform).create.is_expected.with_('follow', **create_params).returning(xform.raw)
 		response = self.add(**kw)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 
@@ -50,21 +58,14 @@ class TransformAddTest(TestCase):
 	def all_transforms(self):
 		return transform.Transform.all().fetch(100)
 
-	@ignore
 	def test_should_delete_a_transform_and_redirect_to_index(self):
 		response = self.add(**self.default_opts).follow()
 		self.assertEqual(len(self.all_transforms()), 1)
 		
-		delete_form = response.forms['delete_transform_%s' % self.all_transforms()[0].key()]
+		delete_form = self.first_form('delete', response)
 		response = self.delete(delete_form)
 		self.assertEqual(len(self.all_transforms()), 0)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
-
-	def first_form(self, match, request):
-		for name, form in request.forms.items():
-			if name.startswith(match):
-				return form
-		raise KeyError(match)
 
 	@ignore
 	def test_should_update_an_existing_transform(self):
@@ -90,14 +91,13 @@ class TransformAddTest(TestCase):
 		
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 
-	@ignore
 	def test_should_show_a_list_of_transforms(self):
-		response = self.add(host_match='localhost', selector='div[class]', name="transform 1")
-		print response.body
+		response = self.add(host_match='localhost', selector='div[class]', name="transform 1").follow()
+		print >> sys.stderr, response.body
 		response.mustcontain("transform 1")
 		response.mustcontain("div[class]")
 		response.mustcontain("localhost")
-		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
+		self.assertEqual(response.request.url, fixtures.app_root + 'transform/')
 
 
 

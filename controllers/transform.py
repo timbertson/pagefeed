@@ -1,4 +1,5 @@
 import cgi
+from google.appengine.ext import db
 
 from base import *
 from models import Transform
@@ -31,7 +32,7 @@ class TransformHandler(BaseHandler):
 			xform = Transform.get(self.key())
 			[setattr(xform, k, v) for k,v in transform_params.items()]
 		else:
-			xform = Transform(**transform_params)
+			xform = Transform.create(self.request.get('action'), **transform_params)
 		xform.put()
 		if self.is_ajax():
 			self.response.out.write(render('snippets', 'transform.html', {'transform':xform}))
@@ -40,5 +41,8 @@ class TransformHandler(BaseHandler):
 
 class TransformDeleteHandler(TransformHandler):
 	def post(self):
-		Transform.get(self.key()).delete()
+		debug("key: %r" % (self.key(),))
+		db.delete(self.key())
+		# xform.delete()
+		self.redirect(self.root)
 
