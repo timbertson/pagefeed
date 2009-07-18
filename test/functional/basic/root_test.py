@@ -34,14 +34,15 @@ class RootTest(TestCase):
 		page = fixtures.stub_page()
 		response = fixtures.app().get('/')
 		forms = response.forms
-		delete_form = forms[1]
-		
+		delete_form = forms['delete_page_%s' % (page.key())]
+
 		def check(owner, url):
 			self.assertEqual(url, page.url)
 			return page
 			
 		mock_on(Page).find.with_action(check)
-		
+		mock_on(page).delete.is_expected
+
 		response = delete_form.submit().follow()
 		self.assertEqual(response.request.url, 'http://localhost/')
 		
@@ -49,7 +50,7 @@ class RootTest(TestCase):
 		page = fixtures.stub_page()
 		response = fixtures.app().get('/')
 		forms = response.forms
-		update_form = forms[2]
+		update_form = forms['update_page_%s' % page.key()]
 		
 		def check(owner, url):
 			self.assertEqual(url, page.url)

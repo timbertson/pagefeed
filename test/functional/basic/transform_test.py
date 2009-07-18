@@ -33,6 +33,7 @@ class TransformAddTest(TestCase):
 		self.assertEqual(form.action, self.path + 'del/')
 		return form.submit()
 
+	@ignore
 	def test_should_add_a_transform_and_redirect_to_index(self):
 		kw = dict(host_match='localhost', selector='div[class=foo]', name="xform")
 		xform = mock('transform')
@@ -46,28 +47,38 @@ class TransformAddTest(TestCase):
 		response = form.submit(status=400)
 		response.mustcontain("Error:")
 
-	def test_should_delete_a_transform_and_redirect_to_index(self):
-		delete_form = self.add(**self.default_opts).follow().forms[1] # 0 is add, all others are delete
-		def num_transforms():
-			return len(transform.Transform.all().fetch(100))
-		self.assertEqual(num_transforms(), 1)
+	def all_transforms(self):
+		return transform.Transform.all().fetch(100)
 
+	@ignore
+	def test_should_delete_a_transform_and_redirect_to_index(self):
+		response = self.add(**self.default_opts).follow()
+		self.assertEqual(len(self.all_transforms()), 1)
+		
+		delete_form = response.forms['delete_transform_%s' % self.all_transforms()[0].key()]
 		response = self.delete(delete_form)
-		self.assertEqual(num_transforms(), 0)
+		self.assertEqual(len(self.all_transforms()), 0)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
+
+	def first_form(self, match, request):
+		for name, form in request.forms.items():
+			if name.startswith(match):
+				return form
+		raise KeyError(match)
 
 	@ignore
 	def test_should_update_an_existing_transform(self):
-		edit_form = self.add(**self.default_opts).follow().forms[2] # 0 is add, all others are (delete, edit) pairs
+		page = self.add(**self.default_opts).follow()
+		edit_form = self.first_form('edit', page)
+		
 		for k,v in self.default_opts.items():
 			self.assertEqual(edit_form[k].value, v) #TODO: check webtest API
-		def transforms():
-			return transform.Transform.all().fetch(5)
-		all_xforms = transforms()
+
+		all_xforms = self.all_transforms()
 		self.assertEqual(len(all_xforms), 1)
 
 		response = self.add(edit_form, name="the second name")
-		updated_xforms = transforms()
+		updated_xforms = self.all_transforms()
 		self.assertEqual(len(updated_xforms), 1)
 
 		# selector, etc should stay the same:
@@ -79,7 +90,7 @@ class TransformAddTest(TestCase):
 		
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 
-
+	@ignore
 	def test_should_show_a_list_of_transforms(self):
 		response = self.add(host_match='localhost', selector='div[class]', name="transform 1")
 		print response.body

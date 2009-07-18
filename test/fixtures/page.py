@@ -9,7 +9,6 @@ def stub_page(page=None, url='http://localhost/whatever'):
 	if page is None:
 		page = Page(url=url, title='page title', owner=a_user)
 	page.put()
-	page_id = page.key()
 	mock_on(Page).find_all.returning([page])
 	return page
 
