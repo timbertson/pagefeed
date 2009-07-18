@@ -29,7 +29,9 @@ class TransformHandler(BaseHandler):
 	def post(self):
 		transform_params = self._get_transform_params()
 		if self.key() is not None:
-			xform = Transform.get(self.key())
+			xform = db.get(self.key())
+			info(type(xform))
+			assert isinstance(xform, Transform)
 			[setattr(xform, k, v) for k,v in transform_params.items()]
 		else:
 			xform = Transform.create(self.request.get('action'), **transform_params)
@@ -42,7 +44,7 @@ class TransformHandler(BaseHandler):
 class TransformDeleteHandler(TransformHandler):
 	def post(self):
 		debug("key: %r" % (self.key(),))
-		db.delete(self.key())
+		Transform.delete(Transform.get(self.key()))
 		# xform.delete()
 		self.redirect(self.root)
 
