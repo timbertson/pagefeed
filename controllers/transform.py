@@ -44,7 +44,8 @@ class TransformHandler(BaseHandler):
 class TransformDeleteHandler(TransformHandler):
 	def post(self):
 		debug("key: %r" % (self.key(),))
-		Transform.delete(Transform.get(self.key()))
-		# xform.delete()
-		self.redirect(self.root)
+		xform = Transform.get(self.key())
+		xform.delete()
+		if self.is_ajax():
+			self.redirect(self.root)
 

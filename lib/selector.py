@@ -1,5 +1,4 @@
 import re
-from logging import debug, info, warning
 
 class SelectorError(ValueError):
 	pass
@@ -14,18 +13,14 @@ class BeautifulSoupTraverser(object):
 
 	@classmethod
 	def select(cls, content, selector):
-		debug("selector: %r" % (selector,))
 		parts = cls.split_parts(selector)
-		debug("parts: %r" % (parts,))
 		results = []
 		for part in parts:
 			pipeline = cls.split_pipes(part)
-			debug("pipeline: %r" % (pipeline,))
 			if not pipeline:
 				continue
 			part_results = [content]
 			for pipe in pipeline:
-				debug("applying single selector %r to content %r" % (pipe, part_results))
 				part_results = cls.select_over_list(part_results, pipe)
 			results += part_results
 		return results
@@ -43,7 +38,6 @@ class BeautifulSoupTraverser(object):
 
 		def _index(items):
 			if has_index:
-				debug("getting index %s of %r (%s)" % (idx, items, len(items)))
 				items = [items[idx]]
 			return items
 
@@ -58,7 +52,6 @@ class BeautifulSoupTraverser(object):
 				if attr:
 					val = True if sel['just_attr'] else sel['value']
 					kwargs['attrs'] = {attr:val}
-				debug("findall(%r, %r)" % (args, kwargs))
 				filtered = content.findAll(*args, **kwargs)
 				if has_index:
 					filtered = _index(filtered)
@@ -90,14 +83,12 @@ class BeautifulSoupTraverser(object):
 		inside_bracket_match = '(?:%s|%s|%s)' % (attr_match, attr_with_value_match, index_match)
 
 		match_str = '^(?P<tag>%s)?(?:\[%s\])?$' % (alpha_match, inside_bracket_match,)
-		debug("matcher: %r" % (match_str,))
 		matcher = re.compile(match_str)
 		match = matcher.match(selector)
 		if not match:
 			raise SelectorError("not a valid selector: %r" % (selector,))
 
 		matches = match.groupdict()
-		debug("matched dict for %s is %r" % (selector, matches))
 
 		return matches
 

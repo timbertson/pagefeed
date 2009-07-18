@@ -97,7 +97,7 @@ li {
 	list-style-type:none;
 }
 
-#links form {
+form.unary {
 	display:inline;
 	position:relative;
 	float:right;

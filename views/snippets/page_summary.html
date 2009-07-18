@@ -1,5 +1,5 @@
 <li>
-	<form action="/page/del/" method="POST" class="del ajax" id="delete_page_{{page.key|escape}}">
+	<form action="/page/del/" method="POST" class="del ajax unary" id="delete_page_{{page.key|escape}}">
 		<input type="hidden" name="url" value="{{page.url|escape}}" />
 		<input type="submit" value="X" />
 
@@ -7,7 +7,7 @@
 		<input type="hidden" name="dest" value="li" />
 		<input type="hidden" name="meth" value="remove" />
 	</form>
-	<form action="/page/update/" method="POST" class="update ajax" id="update_page_{{page.key|escape}}">
+	<form action="/page/update/" method="POST" class="update ajax unary" id="update_page_{{page.key|escape}}">
 		<input type="hidden" name="url" value="{{page.url|escape}}" />
 		<input type="submit" value="R" />
 
