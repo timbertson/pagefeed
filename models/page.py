@@ -1,13 +1,14 @@
 from google.appengine.ext import db
 
 from google.appengine.api.urlfetch import fetch, DownloadError
-from helpers import render, view, host_for_url
+from view_helpers import render, view
+from lib.url_helpers import host_for_url
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
 from transform import Transform, TransformError
 from base import BaseModel
-import page_parser as parser
+import lib.page_parser as parser
 
 import re
 

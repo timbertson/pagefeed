@@ -1,5 +1,5 @@
 from mocktest import *
-from models import page_parser
+from lib import page_parser
 
 class PageParserTest(TestCase):
 	def assertParses(self, input, expected):

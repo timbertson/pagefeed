@@ -1,5 +1,5 @@
 import re
-from helpers import absolute_url
+from lib.url_helpers import absolute_url
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 
 
