@@ -187,3 +187,7 @@ form.unary {
 	border-bottom:none;
 	background:#eee;
 }
+
+.header_content {
+	min-height: 120px;
+}

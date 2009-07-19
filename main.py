@@ -16,6 +16,7 @@ application = webapp.WSGIApplication([
 		('/page/del/', PageDeleteHandler),
 		('/page/update/', PageUpdateHandler),
 		('/transform/', TransformHandler),
+		('/about/?', AboutHandler),
 		('/transform/del/', TransformDeleteHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
 		(r'/migrate/(?:([^/]+)/?)?', MigrateHandler),

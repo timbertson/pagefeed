@@ -24,7 +24,7 @@ class BaseHandler(webapp.RequestHandler):
 		if user:
 			return user
 		else:
-			debug('no user - redirecting to "/"')
+			debug('no user - redirecting to: %s' % (self.request.uri,))
 			raise RedirectError(users.create_login_url(self.request.uri))
 		
 	def url(self):
