@@ -13,9 +13,6 @@ from base import BaseModel
 class TransformError(RuntimeError):
 	pass
 
-class ActionProperty(db.StringProperty):
-	pass # don't do validation for now
-
 class Transform(PolyModel, BaseModel):
 	host_match = db.StringProperty(required=True)
 	selector = db.StringProperty(required=True)
@@ -52,7 +49,7 @@ class Transform(PolyModel, BaseModel):
 		debug("applying transform %s to page at url: %s" % (transform, page.url))
 		try:
 			transform.apply(page)
-		except RuntimeError, e:
+		except StandardError, e:
 			errmsg = "transform %s failed: %s" % (type(transform).__name__, e)
 			info(errmsg)
 			info(traceback.format_exc())

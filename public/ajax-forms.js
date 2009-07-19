@@ -5,6 +5,16 @@ function popAjax(elm)  { ajax_reqs -= 1; if(ajax_reqs == 0) stopThrob(); }
 function throb() {     $(".throb").fadeIn(100); }
 function stopThrob() { $(".throb").fadeOut(100); }
 
+var info;
+var debug;
+if(typeof("console") != "undefined") {
+	info = console.log;
+	debug = console.log;
+} else {
+	info = alert;
+	debug = function(s) {}; // nothing to do
+}
+
 var transition_speed = 250; // 1/4 second
 
 var fadeout_opacity = 0.2;
@@ -43,7 +53,7 @@ function ajaxify(base) {
 		} else {
 			target = frm.closest(target_sel);
 		}
-		if(target.length ==0) console.log("no target!");
+		if(target.length ==0) info("no target!");
 		if(method == "replace"){
 			target.animate({'opacity':fadeout_opacity, 'speed':transition_speed/2});
 		}
@@ -69,12 +79,12 @@ function ajaxify(base) {
 					width:600,
 					height:'auto',
 					position:['center',50],
-					beforeclose: function(ev, ui) { console.log("dying!"); dlg.remove(); }, //FIXME: why so awkward?
+					beforeclose: function(ev, ui) { debug("removing dialog..."); dlg.remove(); }, //FIXME: why so awkward?
 					dialogClass: 'dialog'
 				});
 			},
 			success: function(data, status) {
-				console.log("Success!");
+				debug("Success!");
 				var html = $(data, document);
 				markup(html);
 				$("input[type=text]", frm).val(''); // reset form values
@@ -108,7 +118,7 @@ function makeToggles(base) {
 	$(toggleSelector, base).each(function(){
 		var container = $(this).closest(".toggleContainer");
 		if (container.length == 0) {
-			console.log("no container for toggleContent!");
+			info("no container for toggleContent!");
 			return;
 		}
 		if($(".toggleButton", container).length == 0){
