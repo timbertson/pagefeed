@@ -1,0 +1,40 @@
+form input {
+	margin:2px 0;
+}
+
+form.editable input[type=text] {
+	background:none;
+	border:none;
+}
+
+form.editable input[type=text] {
+	font-size:1.1em;
+	background:none;
+	border:2px solid #eee;
+	padding:0 0.1em;
+}
+
+form.editable input:focus {
+	background:#FFF;
+	border:2px solid #ccc;
+}
+
+
+form label {
+	width:5em;
+	display:inline-block;
+	opacity:0.5;
+	text-align:right;
+	padding-right:0.5em;
+}
+
+#new_transform {
+	max-width:60em;
+}
+#new_transform input[type=submit] {
+	position:relative; left:7em;
+}
+
+form.edit_transform input[type=submit] {
+	float:right;
+}

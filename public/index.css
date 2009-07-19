@@ -1,3 +1,5 @@
+@import url("forms.css");
+
 h1, h2 {
 	padding:0;
 	margin:0;
@@ -174,10 +176,9 @@ form.unary {
 	text-align:left;
 	margin:1em 0;
 	margin-bottom:0;
-	width:50%;
 }
 #sidebar * {
-	padding:3px;
+	padding:5px;
 	display:inline;
 	position:relative;
 }
@@ -189,5 +190,5 @@ form.unary {
 }
 
 .header_content {
-	min-height: 120px;
+	min-height: 124px;
 }

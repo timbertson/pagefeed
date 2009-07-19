@@ -9,14 +9,14 @@
 		<input type="hidden" name="meth" value="remove" />
 	</form>
 	
-	<form action="/transform/" method="POST" class="update ajax editable" id="edit_{{transform.key|escape}}">
-		<label for="name_{{transform.key|escape}}">Name: </label><input type="text" id="name_{{transform.key|escape}}" name="name" value="{{transform.name|escape}}"/><br />
+	<form action="/transform/" method="POST" class="update ajax editable edit_transform" id="edit_{{transform.key|escape}}">
+		<label for="name_{{transform.key|escape}}">Name: </label><input type="text" id="name_{{transform.key|escape}}" name="name" value="{{transform.name|escape}}" size="40"/><br />
 		<input type="hidden" name="action" value="follow" />
-		<label for="host_match_{{transform.key|escape}}">host: </label><input type="text" id="host_match_{{transform.key|escape}}" name="host_match" value="{{transform.host_match|escape}}"/><br />
-		<label for="selector_{{transform.key|escape}}">selector: </label><input type="text" id="selector_{{transform.key|escape}}" name="selector" value="{{transform.selector|escape}}"/><br />
+		<label for="host_match_{{transform.key|escape}}">Host: </label><input type="text" id="host_match_{{transform.key|escape}}" name="host_match" value="{{transform.host_match|escape}}" size="40"/><br />
+		<input type="submit" value="update" />
+		<label for="selector_{{transform.key|escape}}">Selector: </label><input type="text" id="selector_{{transform.key|escape}}" name="selector" value="{{transform.selector|escape}}" size="40"/><br />
 		<input type="hidden" name="key" value="{{transform.key|escape}}" />
 
-		<input type="submit" value="update" class="startHidden" />
 
 		<!-- ajax properties -->
 		<input type="hidden" name="dest" value="li" />
