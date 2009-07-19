@@ -46,6 +46,6 @@ class TransformDeleteHandler(TransformHandler):
 		debug("key: %r" % (self.key(),))
 		xform = Transform.get(self.key())
 		xform.delete()
-		if self.is_ajax():
+		if not self.is_ajax():
 			self.redirect(self.root)
 
