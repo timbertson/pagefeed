@@ -1,4 +1,4 @@
-from pagefeed.test.helpers import *
+from test_helpers import *
 from models import page, Transform
 
 class PageTest(TestCase):

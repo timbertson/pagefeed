@@ -1,8 +1,5 @@
-from pagefeed.test.helpers import *
+from test_helpers import *
 from models import page
-from google.appengine.api import users
-
-from pagefeed.test import fixtures
 
 class PageAddTest(TestCase):
 	def add(self, url):

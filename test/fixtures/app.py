@@ -1,7 +1,7 @@
 import os
 from webtest import TestApp
 
-from pagefeed.main import application
+from main import application
 
 from user import a_user
 

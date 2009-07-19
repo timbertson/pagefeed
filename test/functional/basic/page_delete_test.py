@@ -1,8 +1,5 @@
-from pagefeed.test.helpers import *
+from test_helpers import *
 from models.page import Page
-from google.appengine.api import users
-
-from pagefeed.test import fixtures
 
 class PageDeleteTest(TestCase):
 	def delete(self, url, **kwargs):

@@ -3,8 +3,7 @@ from google.appengine.api import users
 
 from models import Page, UserID
 
-from pagefeed.test.helpers import *
-from pagefeed.test import fixtures
+from test_helpers import *
 
 class RootTest(TestCase):
 	

@@ -24,7 +24,7 @@ def init_gae():
 
 	# and start GAE!
 	gae_opts = DEFAULT_ARGS.copy()
-	gae_opts[ARG_CLEAR_DATASTORE] = False
+	gae_opts[ARG_CLEAR_DATASTORE] = True
 	gae_opts[ARG_DATASTORE_PATH] = os.path.join(tempfile.gettempdir(),
 		'nosegae.datastore')
 	gae_opts[ARG_HISTORY_PATH] = os.path.join(tempfile.gettempdir(),

@@ -1,9 +1,8 @@
 import cgi
-from mocktest import *
+from test_helpers import *
 
 from models.page import Page
 from models.user import UserID
-from pagefeed.test import fixtures
 
 class FeedTest(TestCase):
 	def get_feed(self, email, secret, **kwargs):

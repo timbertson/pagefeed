@@ -1,17 +1,19 @@
-from pagefeed.test.helpers import *
+from test_helpers import *
 from models import transform, Transform
-from google.appengine.api import users
-
-from pagefeed.test import fixtures
-
 
 class TransformAddTest(TestCase):
 	path = "/transform/"
 	default_opts = dict(host_match='localhost', selector='div[class=foo]', name="xform")
 	
 	def tearDown(self):
+		self.clean()
+	
+	def setUp(self):
+		self.clean()
+	
+	def clean(self):
 		[t.delete() for t in transform.Transform.all()]
-
+		
 	def fill_in_form(self, form, d):
 		for k, v in d.items():
 			form.set(k, v)
@@ -57,7 +59,7 @@ class TransformAddTest(TestCase):
 		response = form.submit(status=400)
 		response.mustcontain("Error:")
 
-	@ignore("broken because of import path messups in GAE")
+	@ignore("import path issues")
 	def test_should_delete_a_transform_and_redirect_to_index(self):
 		response = self.add(**self.default_opts).follow()
 		self.assertEqual(len(self.all_transforms()), 1)

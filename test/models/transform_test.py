@@ -1,7 +1,6 @@
-from pagefeed.test.helpers import *
+from test_helpers import *
 from pagefeed.models import transform
-from pagefeed.lib.BeautifulSoup import BeautifulSoup as b_soup
-from pagefeed.test import fixtures
+from lib.BeautifulSoup import BeautifulSoup as b_soup
 
 class TransformTest(TestCase):
 	def tearDown(self):
@@ -24,7 +23,6 @@ class TransformTest(TestCase):
 	def test_should_assign_index_automatically(self):
 		pass
 
-	@ignore #TODO
 	def test_should_find_transforms_based_on_owner(self):
 		kw = dict(action='follow', selector='foo', name='foo')
 		transform.Transform.create(host_match='xyz', owner=fixtures.a_user, **kw).put()
@@ -33,7 +31,7 @@ class TransformTest(TestCase):
 		self.assertEqual(len(transform.Transform.find_all(user=fixtures.a_user)), 2)
 		self.assertEqual(len(transform.Transform.find_all(user=fixtures.another_user)), 0)
 
-	@ignore #TODO
+	@ignore("needs transform equality")
 	def test_should_find_transforms_based_on_host_and_owner(self):
 		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user, name='foo')
 		orig_follow.put()
@@ -41,7 +39,7 @@ class TransformTest(TestCase):
 		follows = transform.FollowTransform.find_all(user=fixtures.a_user, host='bar')
 		print repr(list(transform.FollowTransform.find_all(user=fixtures.a_user)))
 		self.assertEqual(len(follows), 1)
-		assertEqual(orig_follow, follows[0])
+		self.assertEqual(orig_follow, follows[0])
 
 	def test_should_follow_url_for_follow_action(self):
 		selector = "div[class=content]|a[1]"
