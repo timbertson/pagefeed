@@ -14,7 +14,7 @@ form.editable input[type=text] {
 	padding:0 0.1em;
 }
 
-form.editable input:focus {
+form.editable input:focus[type=text] {
 	background:#FFF;
 	border:2px solid #ccc;
 }
