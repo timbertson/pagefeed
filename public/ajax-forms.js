@@ -7,7 +7,7 @@ function stopThrob() { $(".throb").fadeOut(100); }
 
 var info;
 var debug;
-if(typeof("console") != "undefined") {
+if(typeof(console) != "undefined") {
 	info = console.log;
 	debug = console.log;
 } else {
