@@ -8,10 +8,12 @@ function stopThrob() { $(".throb").fadeOut(100); }
 var info;
 var debug;
 if(typeof(console) != "undefined") {
-	info = console.log;
-	debug = console.log;
+	// chrome doesn't like native code (i.e console.log) bound to
+	// JS variables - so we curry it manually:
+	info = function(s) { console.log(s) };
+	debug = info;
 } else {
-	info = alert;
+	info = function(s) { alert(s) };
 	debug = function(s) {}; // nothing to do
 }
 
