@@ -31,6 +31,7 @@ def render_page(name, values, layout='standard.html', partial=False):
 	layout_values.update(dict(
 		title = values.get('title', None),
 		header = header,
-		content = content))
+		content = content, 
+		page_name=name))
 	return render(LAYOUT, layout, layout_values)
 

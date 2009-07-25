@@ -1,9 +1,10 @@
 <div id="sidebar">
 	<ul>
-		<li><a href="/" class="fresh">Saved Pages</a></li>
-		<!-- <li><a href="/transform/" class="fresh">Transforms</a></li> -->
-		<li><a href="/about/" class="fresh">About</a></li>
-		<li><form action="/logout/" method="POST"><input type="submit" value="Logout" /></form></li>
+		<li {% ifequal page_name 'index'     %}class="active"{% endifequal %}><a href="/"           class="fresh">Saved Pages</a></li>
+		<li {% ifequal page_name 'about'     %}class="active"{% endifequal %}><a href="/about/"     class="fresh">About</a></li>
+		<li {% ifequal page_name 'faq'       %}class="active"{% endifequal %}><a href="/faq/"       class="fresh">F.A.Q</a></li>
+		<!-- <li {% ifequal page_name 'transform' %}class="active"{% endifequal %}><a href="/transform/" class="fresh">Transorms</a></li> -->
+		<li><a href="/logout/" class="fresh">Logout</a></li>
 	</ul>
 </div>
 

@@ -178,21 +178,37 @@ form.unary {
 
 #sidebar {
 	text-align:left;
-	margin:1em 0;
 	margin-bottom:0;
 }
+
 #sidebar * {
-	padding:5px;
-	display:inline;
-	position:relative;
+	white-space: nowrap;
 }
 
 #sidebar li {
+	margin-top:0.5em;
+	display:inline-block;
+	padding:0.4em;
+	padding-bottom:0.2em;
 	border: 1px solid #999;
 	border-bottom:none;
+	margin-bottom:0;
 	background:#eee;
+	position:relative;
+	top:1px;
+	border-bottom:1px solid #DDDDDD;
+}
+
+#sidebar .active {
+	background:#fff;
+	color:#555;
+	border-bottom-color:#fff;
+}
+
+#sidebar .active a {
+	color:#555;
 }
 
 .header_content {
-	min-height: 124px;
+	min-height: 128px;
 }

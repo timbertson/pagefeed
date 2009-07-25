@@ -38,3 +38,7 @@ form label {
 form.edit_transform input[type=submit] {
 	float:right;
 }
+
+input.add_page {
+	width:70%;
+}
