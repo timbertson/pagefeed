@@ -24,9 +24,13 @@ def absolute_url(url, base_href):
 	>>> absolute_url('/foo/bar', 'http://base/whatever/fdskf')
 	'http://base/foo/bar'
 
+	>>> absolute_url('\\n/foo/bar', 'http://base/whatever/fdskf')
+	'http://base/foo/bar'
+
 	>>> absolute_url('http://localhost/foo', 'http://base/whatever/fdskf')
 	'http://localhost/foo'
 	"""
+	url = url.strip()
 	proto = urlparse(url)[0]
 	if proto:
 		return url
@@ -42,3 +46,7 @@ def absolute_url(url, base_href):
 		else:
 			path = '/'
 		return base_server + path + url
+
+if __name__ == '__main__':
+	import doctest
+	doctest.testmod()
