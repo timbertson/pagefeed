@@ -60,13 +60,17 @@ function ajaxify(base) {
 			target.animate({'opacity':fadeout_opacity, 'speed':transition_speed/2});
 		}
 		
+		var cleanup = function() {
+			ajax_flag().remove(); popAjax(frm);
+		};
+		
 		$.ajax({
 			url: frm.attr("action"),
 			type: frm.attr("method"),
 			data: frm.serialize(),
 			dataType: "html",
-			complete: function() { ajax_flag().remove(); popAjax(frm); },
 			error: function(xhr, textStatus, err) {
+				cleanup();
 				if(method=='replace') {
 					fadeRepace(target);
 				}
@@ -86,6 +90,7 @@ function ajaxify(base) {
 				});
 			},
 			success: function(data, status) {
+				cleanup();
 				debug("Success!");
 				var html = $(data, document);
 				markup(html);
