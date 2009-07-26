@@ -125,7 +125,8 @@ function makeToggles(base) {
 	$(toggleSelector, base).each(function(){
 		var container = $(this).closest(".toggleContainer");
 		if (container.length == 0) {
-			info("no container for toggleContent!");
+			$(this).show();
+			debug("no container for toggleContent!");
 			return;
 		}
 		if($(".toggleButton", container).length == 0){

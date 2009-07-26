@@ -95,7 +95,7 @@ ul {
 	margin:0; padding:0;
 }
 
-li {
+.content > ul > li {
 	max-width:600;
 	margin:0.5em 0;
 	background:#e7e7e7;
