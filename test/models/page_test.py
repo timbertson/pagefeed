@@ -56,14 +56,24 @@ class PageTest(TestCase):
 		self.assertTrue('<a href="http://google.com/abs.html">' in p.content)
 		self.assertTrue('<img src="%spath/to/path2.jpg" />' % base in p.content)
 	
-	def test_should_fall_back_to_a_default_title(self):
+	def test_should_fall_back_to_a_default_title_containing_host(self):
 		stub_result("<html><body>no title...</body></html>")
-		p = new_page()
-		self.assertEqual(p.title, page.DEFAULT_TITLE)
+		p = new_page(url="http://google.com/blah")
+		self.assertEqual(p.title, '[google.com saved item]')
+		self.assertFalse(p.errors)
+	
+	@pending("cant insert failure condition properly...")
+	def test_should_fall_back_to_a_default_title_if_no_host_available(self):
+		stub_result("<html><body>no title...</body></html>")
+		p = page.Page(url='http://localhost', owner=a_user)
+		mock_on(p)._get_host.raising(StandardError)
+		p.put()
+		
+		self.assertEqual(p.title, '[pagefeed saved item]')
 		self.assertTrue("no title..." in p.content)
 		self.assertFalse(p.errors)
 
-	def test_should_fall_back_to_the_whole_html_if_it_has_no_body(self):
+	def test_should_fall_back_to_entire_html_if_it_has_no_body(self):
 		html = "<html><title>no body</title></html>"
 		stub_result(html)
 		p = new_page()
@@ -72,13 +82,11 @@ class PageTest(TestCase):
 		self.assertFalse(p.errors)
 
 
-	def test_should_just_use_ascii_converted_html_on_completely_unparseable(self):
-		ascii_html = "<html></scr + ipt>"
-		bad_html = ascii_html + "\xd5"
-		stub_result(bad_html)
+	def test_should_discard_html_on_completely_unparseable(self):
+		html = "<html></scr + ipt>"
+		stub_result(html)
 		p = new_page()
-		self.assertEqual(p.title, page.DEFAULT_TITLE)
-		self.assertEqual(p.content, ascii_html)
+		self.assertEqual(p.content, '')
 		self.assertTrue(p.errors)
 	
 	def test_should_strip_out_script_and_style_and_link_tags(self):
@@ -154,14 +162,14 @@ class PageTest(TestCase):
 		p = new_page('<title>t</title><body>b</body>', url=url)
 		self.assertEqual(p.html.strip(), '<body>b</body>')
 
-	def test_should_render_as_html_with_errors(self):
+	def test_rendered_page_should_not_include_unparseable_html(self):
 		url = 'http://my_url'
 		orig_html = '<title>t</title><body>b<scr + ipt /></body>'
 
 		p = new_page(orig_html, url=url)
 		html = p.html
-		self.assertTrue('An error occurred' in html, html)
-		self.assertTrue(orig_html in html, html)
+		self.assertTrue('an error occurred' in html, html)
+		self.assertFalse(orig_html in html, html)
 
 	def test_should_have_soup_and_host_attributes(self):
 		p = new_page('<body><p>woo!</p></body>', url='http://google.com/some/page')
@@ -193,5 +201,6 @@ def new_page(content=None, url='http://localhost/dontcare'):
 def stub_result(content, status_code=200):
 	result = mock('result').with_children(status_code=status_code, content=content)
 	mock_on(page).fetch.returning(result.raw)
+	return result
 
 

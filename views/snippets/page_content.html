@@ -1,12 +1,13 @@
 {% if error %}
-<h4>(An error occurred while processing this page. Below is the un-processed content)</h4>
-{% endif %}
+<h4>Sorry, an error occurred while processing this page</h4>
+{% else %}
+	{{ page.content }}
 
-{{ page.content }}
-
-{% if page.messages %}
-	<p>&nbsp;</p>
-	<hr />
-	<p><em>PageFeed Note: </em> the following messages were recorded while processing this page:</p>
-	{{ page.message_html }}
+	{% if page.messages %}
+		<p>&nbsp;</p>
+		<hr />
+		<p><em>PageFeed Note: </em> the following messages were recorded while processing this page:</p>
+		{{ page.message_html }}
+	{% endif %}
+	
 {% endif %}

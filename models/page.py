@@ -12,8 +12,6 @@ import lib.page_parser as parser
 
 import re
 
-DEFAULT_TITLE = '[pagefeed saved item]'
-
 MESSAGE_TYPES = ['error', 'info']
 
 class Page(BaseModel):
@@ -29,14 +27,21 @@ class Page(BaseModel):
 		super(type(self), self).__init__(*a, **k)
 		self.transformed = False
 
+	def default_title(self):
+		try:
+			return "[%s saved item]" % (parser.ascii(self.host),)
+		except StandardError:
+			return '[pagefeed saved item]'
+
 	def populate_content(self, raw_content):
+		import sys
+		print >> sys.stderr, 'JFLKJDKLFD'
 		try:
 			page = parser.parse(raw_content, self.base_href, notify=self.info)
 			self.content = parser.get_body(page)
-			self.title = parser.get_title(page) or DEFAULT_TITLE
+			self.title = parser.get_title(page) or self.default_title()
 		except parser.Unparseable, e:
-			safe_content = parser.ascii(raw_content)
-			self._failed("failed to parse content", safe_content)
+			self._failed("failed to parse content")
 			return
 		if self.transformed:
 			return
@@ -58,13 +63,13 @@ class Page(BaseModel):
 				raise DownloadError("request returned status code %s" % (response.status_code,))
 			self.populate_content(response.content)
 		except DownloadError, e:
-			self._failed(str(e), 'no content was downloaded')
+			self._failed(str(e))
 	
-	def _failed(self, error, content):
+	def _failed(self, error):
 		warning("parse error: %s (url is: %s)" % (error,self.content_url))
-		self.title = DEFAULT_TITLE
+		self.title = self.default_title()
+		self.content = '' #TODO: make this just a default on the content attribute
 		self.error(error)
-		self.content = content
 	
 	def replace_with_contents_from(self, new_url):
 		self._reset_content()

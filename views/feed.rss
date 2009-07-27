@@ -9,7 +9,7 @@
 		{% for page in pages %}
 			<item>
 			<title>{{page.title|escape}}</title>
-			<link>{{page.url}}</link>
+			<link>{{page.url|escape}}</link>
 			<description>
 				{{ page.html|escape }}
 			</description>
