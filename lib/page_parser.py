@@ -120,7 +120,7 @@ htmlstrip = re.compile("<" # open
 	"(?:%s) *= *[^ >]+" % ('|'.join(bad_attrs),) + # undesirable attributes
 	"([^>]*)"  # postfix
 	">"        # end
-)
+, re.I)
 def clean_attributes(html):
 	while htmlstrip.search(html):
 		html = htmlstrip.sub('<\\1\\2>', html)
