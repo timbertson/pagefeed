@@ -37,10 +37,7 @@ class Transform(PolyModel, BaseModel):
 	def find_all(cls, user, host=None):
 		q = db.Query(cls).filter('owner', user)
 		if host is not None:
-			info("applying filter host = %s" % (host,))
 			q.filter('host_match', host)
-		else:
-			info("no host filter")
 		q.order('host_match').order('name')
 		return q.fetch(limit=50)
 
