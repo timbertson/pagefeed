@@ -35,7 +35,6 @@ class Page(BaseModel):
 
 	def populate_content(self, raw_content):
 		import sys
-		print >> sys.stderr, 'JFLKJDKLFD'
 		try:
 			page = parser.parse(raw_content, self.base_href, notify=self.info)
 			self.content = parser.get_body(page)

@@ -6,10 +6,11 @@ def add_load_path(p):
 	if not p in sys.path:
 		sys.path.append(p)
 
-appengine = '/usr/local/google_appengine'
+appengine = os.environ.get('GAE_HOME') or '/usr/local/google_appengine'
 def add_gae_paths():
 	libs = appengine + '/lib/'
 	paths = [appengine, libs] + [libs + d for d in os.listdir(libs)]
+	add_load_path(libs + 'yaml/lib/')
 	map(add_load_path, paths)
 
 def init_gae():
