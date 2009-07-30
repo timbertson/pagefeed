@@ -55,6 +55,35 @@ class PageTest(TestCase):
 		self.assertTrue('<a href="%spath/to/pathed.html">' % base in p.content)
 		self.assertTrue('<a href="http://google.com/abs.html">' in p.content)
 		self.assertTrue('<img src="%spath/to/path2.jpg" />' % base in p.content)
+
+	def test_should_remove_a_bunch_of_unwanted_html_attributes(self):
+		stub_result("""
+				<html>
+					<p style="blah" color="foo" alt="lala">
+						<img src="http://localhost/blah" width  =  100 height=  20px />
+						<div bgcolor=foo>
+							so then style=none should not be stripped
+							<span bgcolor-andthensome="not_strippped"></span>
+						</div>
+					</p>
+				</html>
+			""")
+		p = new_page()
+		expected_html = """
+				<html>
+					<p alt="lala">
+						<img src="http://localhost/blah" />
+						<div>
+							so then style=none should not be stripped
+							<span bgcolor-andthensome="not_strippped"></span>
+						</div>
+					</p>
+				</html>
+			"""
+		print "ACTUAL: " + p.content
+		print '-----'
+		print "EXPECTED: " + expected_html
+		self.assertEqual(p.content.strip().replace('\t',''), expected_html.strip().replace('\t',''))
 	
 	def test_should_fall_back_to_a_default_title_containing_host(self):
 		stub_result("<html><body>no title...</body></html>")

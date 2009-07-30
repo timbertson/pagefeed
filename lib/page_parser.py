@@ -2,6 +2,13 @@ import re
 from lib.url_helpers import absolute_url
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 
+__all__ = [
+	'Unparseable',
+	'parse',
+	'get_title',
+	'get_body',
+	'ascii']
+
 
 class Unparseable(ValueError):
 	pass
@@ -21,9 +28,11 @@ def get_title(soup):
 		return None
 	return normalize_spaces(title)
 
+
 def get_body(soup):
 	[ elem.extract() for elem in soup.findAll(['script', 'link', 'style']) ]
-	return unicode(soup.body or soup)
+	raw_html = unicode(soup.body or soup)
+	return clean_attributes(raw_html)
 
 def ascii(s):
 	return s.decode('ascii', 'ignore')
@@ -104,4 +113,16 @@ def _parse_methods():
 		unicode_cleansed,
 		ascii_cleansed)
 
+# strip out a set of nuisance html attributes that can mess up rendering in RSS feeds
+bad_attrs = ['width','height','style','[-a-z]*color','background[-a-z]*']
+htmlstrip = re.compile("<" # open
+	"([^>]+) " # prefix
+	"(?:%s) *= *[^ >]+" % ('|'.join(bad_attrs),) + # undesirable attributes
+	"([^>]*)"  # postfix
+	">"        # end
+)
+def clean_attributes(html):
+	while htmlstrip.search(html):
+		html = htmlstrip.sub('<\\1\\2>', html)
+	return html
 
