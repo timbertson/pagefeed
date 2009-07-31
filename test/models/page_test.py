@@ -59,7 +59,7 @@ class PageTest(TestCase):
 	def test_should_remove_a_bunch_of_unwanted_html_attributes(self):
 		stub_result("""
 				<html>
-					<p style="blah" COLOR="foo" alt="lala">
+					<p style="border-color:#ff; background:#fff;" COLOR="foo" alt="lala">
 						<img src="http://localhost/blah" width  =  100 height=  20px />
 						<div bgcolor=foo>
 							so then style=none should not be stripped

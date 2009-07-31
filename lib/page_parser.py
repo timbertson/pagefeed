@@ -1,6 +1,7 @@
 import re
 from lib.url_helpers import absolute_url
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
+from logging import error
 
 __all__ = [
 	'Unparseable',
@@ -32,7 +33,13 @@ def get_title(soup):
 def get_body(soup):
 	[ elem.extract() for elem in soup.findAll(['script', 'link', 'style']) ]
 	raw_html = unicode(soup.body or soup)
-	return clean_attributes(raw_html)
+	cleaned = clean_attributes(raw_html)
+	try:
+		BeautifulSoup(cleaned)
+		return cleaned
+	except HTMLParseError:
+		error("cleansing broke html content: %s\n---------\n%s" % (raw_html,cleaned))
+		return raw_html
 
 def ascii(s):
 	return s.decode('ascii', 'ignore')
@@ -115,9 +122,13 @@ def _parse_methods():
 
 # strip out a set of nuisance html attributes that can mess up rendering in RSS feeds
 bad_attrs = ['width','height','style','[-a-z]*color','background[-a-z]*']
+single_quoted = "'[^']+'"
+double_quoted = '"[^"]+"'
+non_space = '[^ "\'>]+'
 htmlstrip = re.compile("<" # open
 	"([^>]+) " # prefix
-	"(?:%s) *= *[^ >]+" % ('|'.join(bad_attrs),) + # undesirable attributes
+	"(?:%s) *" % ('|'.join(bad_attrs),) + # undesirable attributes
+	'= *(?:%s|%s|%s)' % (non_space, single_quoted, double_quoted) + # value
 	"([^>]*)"  # postfix
 	">"        # end
 , re.I)
