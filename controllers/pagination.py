@@ -26,5 +26,6 @@ class PaginatedHandler(BaseHandler):
 		return {
 			'next': self.page_link(pagenum + 1),
 			'prev': self.page_link(pagenum - 1),
+			'first': self.page_link(0),
 		}
 
