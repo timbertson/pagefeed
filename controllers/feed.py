@@ -15,7 +15,7 @@ class FeedHandler(BaseHandler):
 		user = users.User(email)
 		template_values = {
 			'user': user.nickname(),
-			'pages': Page.find_all(user),
+			'pages': Page.find_all(user).fetch(limit=50),
 			'uri': self.uri(),
 		}
 		debug("template values: %r" % (template_values,))

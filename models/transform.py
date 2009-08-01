@@ -39,7 +39,7 @@ class Transform(PolyModel, BaseModel):
 		if host is not None:
 			q.filter('host_match', host)
 		q.order('host_match').order('name')
-		return q.fetch(limit=50)
+		return q
 
 	@classmethod
 	def apply_transform(cls, transform, page):

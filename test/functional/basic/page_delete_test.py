@@ -3,7 +3,7 @@ from models.page import Page
 
 class PageDeleteTest(TestCase):
 	def delete(self, url, **kwargs):
-		return fixtures.app().post('/page/del/', {'url':url}, **kwargs)
+		return PageDriver().delete(url, **kwargs)
 
 	def test_should_delete_a_page_and_redirect_to_root(self):
 		url = 'http://localhost/page_to_delete'

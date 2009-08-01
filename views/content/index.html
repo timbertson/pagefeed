@@ -1,3 +1,13 @@
+	<div class="pagination_container page">
+		{% if pagination.prev %}
+			<a href="{{ pagination.prev|escape }}" class="pagination prev fresh">&lt;-&nbsp;previous</a>
+		{% endif %}
+
+		{% if pagination.next %}
+			<a href="{{ pagination.next|escape }}" class="pagination next fresh">next&nbsp;-&gt;</a>
+		{% endif %}
+	</div>
+
 <h2>Your current links:</h2>
 <ul id="links">
 	{% if pages %}

@@ -1,9 +1,14 @@
 import urllib2
 
 from base import *
+from pagination import PaginatedHandler
+
 from models import Page, UserID, Feed
 
-class MainHandler(BaseHandler):
+class MainHandler(PaginatedHandler):
+	def all_instances(self):
+		return Page.find_all(self.user())
+	
 	def get(self):
 		user = self.user()
 		
@@ -11,8 +16,9 @@ class MainHandler(BaseHandler):
 		bookmarklet_js.replace('\n', ' ')
 		template_values = {
 			'name': user.nickname(),
-			'pages': Page.find_all(user),
+			'pages': self.paginated(self.all_instances()),
 			'feed_link': Feed.path_for(user),
+			'pagination': self.pagination_links(),
 			'bookmarklet': urllib2.quote(bookmarklet_js)
 		}
 		debug("template values: %r" % template_values)

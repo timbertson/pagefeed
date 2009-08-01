@@ -89,8 +89,8 @@ class Page(BaseModel):
 		super(type(self), self).put(*a,**k)
 
 	@classmethod
-	def find_all(cls, owner, limit=50):
-		return db.Query(cls).filter('owner =', owner).order('-date').fetch(limit=limit)
+	def find_all(cls, owner):
+		return db.Query(cls).filter('owner =', owner).order('-date')
 	
 	@classmethod
 	def find(cls, owner, url):

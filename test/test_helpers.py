@@ -7,6 +7,7 @@ console.gae()
 
 import fixtures
 from fixtures import *
+from lib.BeautifulSoup import BeautifulSoup
 
 from google.appengine.api import users
 

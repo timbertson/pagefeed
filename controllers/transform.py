@@ -6,8 +6,12 @@ from models import Transform
 
 class TransformHandler(BaseHandler):
 	root = "/transform/"
+
+	def all_instances(self):
+		return Transform.find_all(self.user())
+	
 	def get(self):
-		transforms = Transform.find_all(self.user())
+		transforms = self.all_instances().fetch(limit=50)
 		self.response.out.write(render_page('transforms', {'transforms':transforms}))
 	
 	def key(self):

@@ -28,16 +28,15 @@ class TransformTest(TestCase):
 		transform.Transform.create(host_match='xyz', owner=fixtures.a_user, **kw).put()
 		transform.Transform.create(host_match='bar', owner=fixtures.a_user, **kw).put()
 
-		self.assertEqual(len(transform.Transform.find_all(user=fixtures.a_user)), 2)
-		self.assertEqual(len(transform.Transform.find_all(user=fixtures.another_user)), 0)
+		self.assertEqual(len(transform.Transform.find_all(user=fixtures.a_user).fetch(10)), 2)
+		self.assertEqual(len(transform.Transform.find_all(user=fixtures.another_user).fetch(10)), 0)
 
 	@ignore("needs transform equality")
 	def test_should_find_transforms_based_on_host_and_owner(self):
 		orig_follow = transform.Transform.create(action='follow', selector='foo', host_match='bar', owner=fixtures.a_user, name='foo')
 		orig_follow.put()
 		
-		follows = transform.FollowTransform.find_all(user=fixtures.a_user, host='bar')
-		print repr(list(transform.FollowTransform.find_all(user=fixtures.a_user)))
+		follows = list(transform.FollowTransform.find_all(user=fixtures.a_user, host='bar'))
 		self.assertEqual(len(follows), 1)
 		self.assertEqual(orig_follow, follows[0])
 

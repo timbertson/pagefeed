@@ -3,7 +3,7 @@ from models import page
 
 class PageAddTest(TestCase):
 	def add(self, url):
-		return fixtures.app().post('/page/', {'url':url})
+		return PageDriver().add(url)
 
 	def test_should_add_a_page_and_redirect_to_root(self):
 		url = 'http://localhost/page_to_save'

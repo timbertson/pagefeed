@@ -94,9 +94,11 @@ a.fresh:visited { color: #25d }
 ul {
 	margin:0; padding:0;
 }
+.content {
+	max-width:600;
+}
 
 .content > ul > li {
-	max-width:600;
 	margin:0.5em 0;
 	background:#e7e7e7;
 	padding:0.2em;
@@ -211,4 +213,21 @@ form.unary {
 
 .header_content {
 	min-height: 128px;
+}
+
+
+.pagination_container {
+	float:right;
+	margin-top:0.85em;
+}
+
+a.pagination { padding:0 6px; }
+a.pagination.next {
+	border-left:2px solid #eee;
+	padding-left:8px;
+}
+
+a.pagination.next:first-child {
+	border-left:none;
+	padding-left:6px;
 }

@@ -13,4 +13,3 @@ def app():
 	os.environ['SERVER_PORT'] = '8000'
 	return TestApp(application)
 
-

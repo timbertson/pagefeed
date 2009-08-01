@@ -31,11 +31,11 @@ class BaseHandler(webapp.RequestHandler):
 		url = self.request.get('url')
 		if url:
 			return url
-		raise HttpError(400)
+		raise HttpError(400, 'no URL provided')
 	
 	def uri(self):
 		return self.request.uri.split('?')[0]
 	
 	def is_ajax(self):
 		return bool(self.request.get('ajax'))
-	
+
