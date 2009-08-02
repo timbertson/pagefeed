@@ -3,6 +3,7 @@ from lib.url_helpers import absolute_url
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import error
 
+
 __all__ = [
 	'Unparseable',
 	'parse',
@@ -10,6 +11,7 @@ __all__ = [
 	'get_body',
 	'ascii']
 
+def debug(s): pass
 
 class Unparseable(ValueError):
 	pass
@@ -109,11 +111,15 @@ def _remove_crufty_html(content):
 def _parse_methods():
 	def unicode_cleansed(content, base_href):
 		content = UnicodeDammit(content, isHTML=True).markup
-		return beautiful_soup(_remove_crufty_html(content), base_href)
+		cleaned = _remove_crufty_html(content)
+		debug("Cleaned content: %s" % (cleaned,))
+		return beautiful_soup(cleaned, base_href)
 
 	def ascii_cleansed(content, base_href):
 		content = ascii(content)
-		return beautiful_soup(_remove_crufty_html(content), base_href)
+		cleaned = _remove_crufty_html(content)
+		debug("Cleaned content: %s" % (cleaned,))
+		return beautiful_soup(cleaned, base_href)
 
 	return (
 		beautiful_soup,
