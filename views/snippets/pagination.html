@@ -1,0 +1,10 @@
+<div class="pagination_container page">
+	{% if pagination.prev %}
+		<a href="{{ pagination.first|escape }}" class="pagination first fresh">&laquo;&nbsp;first</a>
+		<a href="{{ pagination.prev|escape }}" class="pagination prev fresh">&lsaquo;&nbsp;previous</a>
+	{% endif %}
+
+	{% if pagination.next %}
+		<a href="{{ pagination.next|escape }}" class="pagination next fresh">next&nbsp;&rsaquo;</a>
+	{% endif %}
+</div>
