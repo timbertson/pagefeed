@@ -6,6 +6,9 @@ api_version: 1
 handlers:
 - url: /public
   static_dir: public
+- url: /robots.txt
+  static_files: public/robots.txt
+  upload: public/robots.txt
 - url: .*
   script: main.py
   
