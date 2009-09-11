@@ -1,0 +1,18 @@
+li.selectable {
+	border: 2px white solid;
+}
+
+li.navim_active {
+	border-color: #999 !important;
+	background-color:#eee !important;
+}
+li.navim_active h3 {
+	background-color: #f5f5f5 !important;
+}
+
+a.navim_active {
+	background-color: #999 !important;
+	color: #fff !important;
+	border-left-color:transparent !important;
+}
+
