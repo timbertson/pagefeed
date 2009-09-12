@@ -120,22 +120,40 @@ jQuery_navim_plugin.util = {
 		}
 	},
 
-	action: function(elem) {
+	action: function(elem, shiftPressed) {
 		var links = jQuery("a[href]", elem);
 		if(elem.attr("nodeName").match(/^a$/i)) {
 			links = $(elem);
 		}
 		if(links.length > 0) {
 			//TODO: why can't i just click() the link?
-			document.location.href = links.eq(0).attr('href');
+			var href = links.eq(0).attr('href');
+			if(shiftPressed) {
+				window.open(href);
+			} else {
+				document.location.href = href;
+			}
 		}
 	},
 };
 
 jQuery_navim_plugin.state = {
 	vertical: null,
-	currentElement: null
+	currentElement: null,
+	shiftPressed: false
 }
+
+jQuery_navim_plugin.onKeyUp = function(e) {
+	if(e.which == 16) { // shift key
+		jQuery_navim_plugin.state.shiftPressed = false;
+	}
+};
+
+jQuery_navim_plugin.onKeyDown = function(e) {
+	if(e.which == 16) { // shift key
+		jQuery_navim_plugin.state.shiftPressed = true;
+	}
+};
 
 jQuery_navim_plugin.keyHandler = function(e) {
 	if(jQuery("input:focus").length > 0 && e.which in [13, 0]) return true;
@@ -143,10 +161,12 @@ jQuery_navim_plugin.keyHandler = function(e) {
 	var mapping = {
 		106: function() {u.go(1);  return false;},
 		107: function() {u.go(-1); return false;},
-		13:  function() {u.action(jQuery_navim_plugin.state.currentElement); return false;},
+		13:  function() {
+			u.action(jQuery_navim_plugin.state.currentElement, jQuery_navim_plugin.state.shiftPressed);
+			return false;
+		},
 		0: function()   {return u.tabNext();},
 	};
-	//alert(e.which);
 	if(e.which in mapping) {
 		return mapping[e.which]();
 	}
@@ -156,6 +176,8 @@ jQuery_navim_plugin.ensureActive = function() {
 	if(jQuery_navim_plugin.started) return;
 	jQuery_navim_plugin.started = true;
 	jQuery(window).keypress(jQuery_navim_plugin.keyHandler);
+	jQuery(window).keydown(jQuery_navim_plugin.onKeyDown);
+	jQuery(window).keyup(jQuery_navim_plugin.onKeyUp);
 };
 
 jQuery.vimNavigationAction = function(callback) {

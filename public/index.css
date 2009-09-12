@@ -232,3 +232,21 @@ a.pagination:first-child {
 	border-left:none;
 	padding-left:6px;
 }
+
+.footnote {
+	font-size:0.9em;
+	color: #999;
+	padding:5px;
+	float:left;
+	display:inline;
+}
+.footnote em {
+	color:#666;
+	font-weight:bold;
+	font-style:normal;
+}
+
+.footnote a , .footnote a:hover, .footnote a:visited {
+	opacity:0.8;
+}
+
