@@ -45,10 +45,11 @@ $(function() {
 
 	$.vimNavigation(delegate);
 
+	// add a custom "d" action button:
 	$(window).keypress(function(e) {
 		if(e.which == 100) { // 'd'
-			$("form.del", $(".navim_active").eq(0)).eq(0).submit();
-			return(false);
+			$(".navim_active").children("form.del").eq(0).submit();
+			return false;
 		}
 	});
 });
