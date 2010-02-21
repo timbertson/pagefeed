@@ -56,7 +56,7 @@ class Page(BaseModel):
 
 	def fetch(self):
 		try:
-			response = fetch(self.content_url, allow_truncated=True)
+			response = fetch(self.content_url, allow_truncated=True, deadline=8)
 			if response.status_code >= 400:
 				warning("request returned status code %s\n%s" % (response.status_code, response.content))
 				raise DownloadError("request returned status code %s" % (response.status_code,))
