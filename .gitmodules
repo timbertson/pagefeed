@@ -1,0 +1,3 @@
+[submodule "readability"]
+	path = readability
+	url = http://github.com/gfxmonk/python-readability.git

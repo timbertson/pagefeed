@@ -8,7 +8,7 @@ from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
 from transform import Transform, TransformError
 from base import BaseModel
-import lib.page_parser as parser
+import lib.readability as parser
 
 import re
 
@@ -36,9 +36,9 @@ class Page(BaseModel):
 	def populate_content(self, raw_content):
 		import sys
 		try:
-			page = parser.parse(raw_content, self.base_href, notify=self.info)
-			self.content = parser.get_body(page)
-			self.title = parser.get_title(page) or self.default_title()
+			page = parser.Document(raw_content, url=self.base_href, notify=self.info)
+			self.content = page.summary()
+			self.title = page.title() or self.default_title()
 		except parser.Unparseable, e:
 			self._failed("failed to parse content")
 			return
