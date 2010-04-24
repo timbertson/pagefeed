@@ -3,7 +3,7 @@ import urllib2
 from base import *
 from pagination import PaginatedHandler
 
-from models import Page, UserID, Feed
+from models import Page, UserID, Feed, Epub
 
 class MainHandler(PaginatedHandler):
 	def all_instances(self):
@@ -18,6 +18,7 @@ class MainHandler(PaginatedHandler):
 			'name': user.nickname(),
 			'pages': self.paginated(self.all_instances()),
 			'feed_link': Feed.path_for(user),
+			'epub_link': Epub.path_for(user),
 			'pagination': self.pagination_links(),
 			'bookmarklet': urllib2.quote(bookmarklet_js)
 		}
