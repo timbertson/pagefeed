@@ -2,8 +2,8 @@
 <rss version="2.0">
 
 	<channel>
-		<title>saved feeds for {{user|escape}}</title>
-		<description>pagefeed RSS for user {{user|escape}}</description>
+		<title>pagefeed saved feeds</title>
+		<description>pagefeed RSS</description>
 		<link>{{uri|escape}}</link>
 
 		{% for page in pages %}
