@@ -20,7 +20,6 @@ application = webapp.WSGIApplication([
 		('/faq/?', FaqHandler),
 		('/transform/del/', TransformDeleteHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
-		(r'/epub/(\d+)-([^/]+)/', EpubHandler),
 		(r'/migrate/(?:([^/]+)/?)?', MigrateHandler),
 		], debug=True)
 
