@@ -1,12 +1,13 @@
 <h1>Welcome to PageFeed</h1>
 
-<p><a href="{{feed_link|escape}}" class="fresh">Click here for your custom feed</a>
-	(but don't tell anyone else this link, it's private)
+<p>Grab your custom <a href="{{feed_link|escape}}" class="fresh">RSS feed</a>
+	or <a href="/recipe/" class="fresh">calibre recipe</a>[<a href="/about/#calibre">?</a>]
+	(but don't share these - they're private)
 </p>
 
 <p>
-	Also of use is the bookmarklet:
-	<a href="javascript:{{bookmarklet|escape}}" class="fresh">pagefeed</a> (drag it somewhere and click it later!)
+	Also drag the <a href="javascript:{{bookmarklet|escape}}" class="fresh">pagefeed</a>
+	bookmarklet to your bookmarks to easily add pages you're reading.
 </p>
 <br />
 <form action="/page/" method="POST" class="add_url ajax" id="add_page_form">
