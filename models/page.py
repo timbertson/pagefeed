@@ -37,8 +37,9 @@ class Page(BaseModel):
 		import sys
 		try:
 			page = parser.Document(raw_content, url=self.base_href, notify=self.info)
-			self.content = page.summary()
 			self.title = page.title() or self.default_title()
+			self.put(failsafe=True) # ensure the datastore has *something*, even if parsing never completes
+			self.content = page.summary()
 		except parser.Unparseable, e:
 			self._failed("failed to parse content")
 			return
@@ -84,8 +85,11 @@ class Page(BaseModel):
 			self.put()
 	
 	def put(self, *a, **k):
-		if self.content is None:
-			self.fetch()
+		if 'failsafe' in k:
+			del k['failsafe']
+		else:
+			if self.content is None:
+				self.fetch()
 		super(type(self), self).put(*a,**k)
 
 	@classmethod
