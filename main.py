@@ -15,6 +15,7 @@ application = webapp.WSGIApplication([
 		('/recipe/', RecipeHandler),
 		('/page/bookmarklet/', PageBookmarkletHandler),
 		('/page/del/', PageDeleteHandler),
+		('/page/list/', PageListHandler),
 		('/page/update/', PageUpdateHandler),
 		('/transform/', TransformHandler),
 		('/about/?', AboutHandler),

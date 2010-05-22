@@ -24,4 +24,3 @@ class MainHandler(PaginatedHandler):
 		debug("template values: %r" % template_values)
 		
 		self.response.out.write(render_page('index', template_values))
-

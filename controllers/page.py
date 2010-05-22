@@ -61,3 +61,8 @@ class PageDeleteHandler(PageHandler):
 class PageUpdateHandler(PageHandler):
 	def post(self):
 		page = self._add(self.user(), self.url(), success = self._render_success, force=True)
+
+class PageListHandler(BaseHandler):
+	def get(self):
+		pages = Page.find_all(self.user())
+		self.response.out.write("\n".join(page.url.encode('UTF-8') for page in pages))
