@@ -39,7 +39,9 @@ class Page(BaseModel):
 			page = parser.Document(raw_content, url=self.base_href, notify=self.info)
 			self.title = page.title() or self.default_title()
 			self.put(failsafe=True) # ensure the datastore has *something*, even if parsing never completes
-			self.content = page.summary()
+			#TODO: get summary working with decent performance
+			#self.content = page.summary()
+			self.content = page.content()
 		except parser.Unparseable, e:
 			self._failed("failed to parse content")
 			return
