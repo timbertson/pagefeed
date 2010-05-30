@@ -44,6 +44,8 @@ class PageHandler(BaseHandler):
 		if self.is_ajax():
 			if page is not None:
 				self.response.out.write(render("snippets/page_summary.html", {'page':page}))
+		elif self.quiet_mode():
+			return
 		else:
 			self.redirect('/')
 

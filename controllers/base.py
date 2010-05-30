@@ -37,5 +37,10 @@ class BaseHandler(webapp.RequestHandler):
 		return self.request.uri.split('?')[0]
 	
 	def is_ajax(self):
-		return bool(self.request.get('ajax'))
+		return self._true_param('ajax')
 
+	def quiet_mode(self):
+		return self._true_param('quiet')
+	
+	def _true_param(self, param_name):
+		return self.request.get(param_name, "false").lower() in ("true", "1")
