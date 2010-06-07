@@ -99,6 +99,10 @@ class Page(BaseModel):
 		return db.Query(cls).filter('owner =', owner).order('-date')
 	
 	@classmethod
+	def find_since(cls, owner, date):
+		return db.Query(cls).filter('owner =', owner).filter('date >=', date).order('date')
+	
+	@classmethod
 	def find(cls, owner, url):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
 	

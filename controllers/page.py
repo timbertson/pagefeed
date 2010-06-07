@@ -66,5 +66,14 @@ class PageUpdateHandler(PageHandler):
 
 class PageListHandler(BaseHandler):
 	def get(self):
-		pages = Page.find_all(self.user())
-		self.response.out.write("\n".join(page.url.encode('UTF-8') for page in pages))
+		from django.utils import simplejson as json
+		import time
+		from datetime import datetime
+		since = int(self.request.get('since', 0))
+		since_time = datetime.fromtimestamp(since)
+		pages = Page.find_since(self.user(), since_time)
+		page_info = []
+		for page in pages:
+			pagetime = int(time.mktime(page.date.timetuple()))
+			page_info.append({'date':pagetime, 'url':page.url, 'title':page.title})
+		json.dump(page_info, self.response.out)
