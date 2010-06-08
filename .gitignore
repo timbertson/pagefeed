@@ -1,5 +1,4 @@
 *.pyc
-index.yaml
 *.auto*
 *~
 *.egg-info
