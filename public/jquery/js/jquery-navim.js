@@ -158,6 +158,9 @@ jQuery_navim_plugin.onKeyDown = function(e) {
 jQuery_navim_plugin.keyHandler = function(e) {
 	if(jQuery("input:focus").length > 0 && e.which in [13, 0]) return true;
 	var u = jQuery_navim_plugin.util;
+	if (e.target.nodeName.toLowerCase() == 'input') {
+		return;
+	}
 	var mapping = {
 		106: function() {u.go(1);  return false;},
 		107: function() {u.go(-1); return false;},
