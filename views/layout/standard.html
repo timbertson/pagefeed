@@ -13,6 +13,9 @@
 		{% if feed_link %}
 			<link href="{{feed_link|escape}}" type="application/rss+xml" rel="alternate" title="PageFeed saved items" />
 		{% endif %}
+		{% if custom_css %}
+			<link rel="stylesheet" href="/public/{{custom_css}}.css" />
+		{% endif %}
 	</head>
 	
 	<body>

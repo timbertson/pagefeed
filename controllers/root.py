@@ -9,6 +9,9 @@ class MainHandler(PaginatedHandler):
 	def all_instances(self):
 		return Page.find_all(self.user())
 	
+	def is_kindle(self):
+		return 'kindle/' in str(self.request.headers.get('User-Agent', '')).lower()
+	
 	def get(self):
 		user = self.user()
 		
@@ -21,6 +24,8 @@ class MainHandler(PaginatedHandler):
 			'pagination': self.pagination_links(),
 			'bookmarklet': urllib2.quote(bookmarklet_js)
 		}
+		if self.is_kindle():
+			template_values['custom_css'] = 'kindle'
 		debug("template values: %r" % template_values)
 		
 		self.response.out.write(render_page('index', template_values))

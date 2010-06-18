@@ -19,11 +19,6 @@ indexes:
   properties:
   - name: owner
   - name: date
-
-- kind: Page
-  properties:
-  - name: owner
-  - name: date
     direction: desc
 
 - kind: Transform
