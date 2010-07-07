@@ -9,6 +9,9 @@ handlers:
 - url: /robots.txt
   static_files: public/robots.txt
   upload: public/robots.txt
+- url: /feed/.*
+  secure: always
+  script: main.py
 - url: .*
   script: main.py
   
