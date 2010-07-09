@@ -1,4 +1,6 @@
 import cgi
+from django.utils import simplejson as json
+from datetime import datetime
 
 from base import *
 from models import Page
@@ -44,6 +46,9 @@ class PageHandler(BaseHandler):
 		if self.is_ajax():
 			if page is not None:
 				self.response.out.write(render("snippets/page_summary.html", {'page':page}))
+		elif self.is_json():
+			page_info = [p.json_attrs() for p in (page) if p is not None]
+			json.dump(page_info, self.response.out)
 		elif self.quiet_mode():
 			return
 		else:
@@ -66,14 +71,9 @@ class PageUpdateHandler(PageHandler):
 
 class PageListHandler(BaseHandler):
 	def get(self):
-		from django.utils import simplejson as json
-		import time
-		from datetime import datetime
 		since = int(self.request.get('since', 0))
 		since_time = datetime.fromtimestamp(since)
 		pages = Page.find_since(self.user(), since_time)
-		page_info = []
-		for page in pages:
-			pagetime = int(time.mktime(page.date.timetuple()))
-			page_info.append({'date':pagetime, 'url':page.url, 'title':page.title})
+		page_info = [page.json_attrs() for page in pages]
 		json.dump(page_info, self.response.out)
+

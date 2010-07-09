@@ -42,5 +42,8 @@ class BaseHandler(webapp.RequestHandler):
 	def quiet_mode(self):
 		return self._true_param('quiet')
 	
+	def is_json(self):
+		return self._true_param('ajax')
+	
 	def _true_param(self, param_name):
 		return self.request.get(param_name, "false").lower() in ("true", "1")
