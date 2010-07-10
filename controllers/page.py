@@ -17,7 +17,7 @@ class PageHandler(BaseHandler):
 			page.update(force=force)
 			if force:
 				new_page = page
-		if page.errors:
+		if page.errors and not self.is_json():
 			self._render_error(page)
 		else:
 			if success is not None:
@@ -47,12 +47,15 @@ class PageHandler(BaseHandler):
 			if page is not None:
 				self.response.out.write(render("snippets/page_summary.html", {'page':page}))
 		elif self.is_json():
-			page_info = [p.json_attrs() for p in (page) if p is not None]
-			json.dump(page_info, self.response.out)
+			self._page_json(page)
 		elif self.quiet_mode():
 			return
 		else:
 			self.redirect('/')
+	
+	def _page_json(self, page):
+		page_info = [p.json_attrs() for p in (page,) if p is not None]
+		json.dump(page_info, self.response.out)
 
 class PageBookmarkletHandler(PageHandler):
 	def get(self):

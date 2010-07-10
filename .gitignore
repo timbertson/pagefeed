@@ -2,3 +2,4 @@
 *.auto*
 *~
 *.egg-info
+.tags

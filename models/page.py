@@ -5,6 +5,7 @@ from view_helpers import render, view
 from lib.url_helpers import host_for_url
 import time
 from datetime import datetime
+from lib.Python26HTMLParser import HTMLParser
 
 from lib.BeautifulSoup import BeautifulSoup, HTMLParseError, UnicodeDammit
 from logging import debug, info, warning, error
@@ -98,7 +99,12 @@ class Page(BaseModel):
 	
 	def json_attrs(self):
 		pagetime = int(time.mktime(self.date.timetuple()))
-		return {'date':pagetime, 'url':self.url, 'title':self.title}
+		title = self.title
+		try:
+			title = HTMLParser().unescape(title)
+		except StandardError, e:
+			info("couldn't html-decode title: %s" % (e,))
+		return {'date':pagetime, 'url':self.url, 'title':title}
 
 	@classmethod
 	def find_all(cls, owner):
