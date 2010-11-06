@@ -15,12 +15,15 @@ class MainHandler(PaginatedHandler):
 	def get(self):
 		user = self.user()
 		
-		bookmarklet_js = render('snippets/bookmarklet.js', {'host':host_for_url(self.uri())})
+		host = host_for_url(self.uri())
+		bookmarklet_js = render('snippets/bookmarklet.js', {'host':host})
 		bookmarklet_js.replace('\n', ' ')
+		feed_url = Feed.url_for(user, host)
+
 		template_values = {
 			'name': user.nickname(),
 			'pages': self.paginated(self.all_instances()),
-			'feed_link': Feed.path_for(user),
+			'feed_link': feed_url,
 			'pagination': self.pagination_links(),
 			'bookmarklet': urllib2.quote(bookmarklet_js)
 		}

@@ -9,4 +9,8 @@ class Feed(object):
 		email = user.email()
 		user_handle = UserID.get(email).handle
 		return '/feed/%s-%s/' % (user_handle, urllib2.quote(email))
+	
+	@classmethod
+	def url_for(cls, user, host):
+		return "https://%s%s" % (host, cls.path_for(user),)
 
