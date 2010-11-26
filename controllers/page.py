@@ -56,6 +56,12 @@ class PageHandler(BaseHandler):
 	def _page_json(self, page):
 		page_info = [p.json_attrs() for p in (page,) if p is not None]
 		json.dump(page_info, self.response.out)
+	
+	def get(self):
+		page = Page.find(owner=self.user(), url=self.url())
+		if page is None:
+			raise HttpError(404, "could not find saved page: %s" % (cgi.escape(self.url(),)))
+		self.response.out.write(page.content)
 
 class PageBookmarkletHandler(PageHandler):
 	def get(self):
