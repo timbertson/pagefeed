@@ -1,5 +1,75 @@
 from test_helpers import *
 from models import page, Transform
+from models.page import Page
+
+some_url = 'http://localhost/dontcare'
+
+class PageLifecycleTest(TestCase):
+	def setUp(self):
+		super(PageLifecycleTest, self).setUp()
+		self.defer_mock = mock(page.deferred).defer
+
+	def test_page_should_start_with_no_content(self):
+		p = Page(url=some_url, owner=a_user)
+		self.assertEquals(p.content, None)
+		self.assertNotNone(p.key())
+	
+	def test_page_creation_should_launch_a_task_to_fetch_data(self):
+		p = Page(url=some_url, owner=a_user)
+		expect(defer_mock).defer.once().with_args(page.fetch_raw_content, p.key())
+
+	def test_fetch_data_should_launch_content_extraction_tasks(self):
+		extractor1, extractor2 = mock(), mock()
+		modify(page).content_extractors = [extractor1, extractor2]
+
+		p = Page(url=some_url, owner=a_user)
+
+		expect(page.Transform).process(p)
+		expect(self.defer_mock).defer(extractor1, p.key())
+		expect(self.defer_mock).defer(extractor2, p.key())
+		expect(self.defer_mock).defer(page.store_best_content, p.key())
+
+		p.fetch_content()
+	
+	def test_should_log_error_and_ignore_transforms_if_they_fail(self):
+		modify(page).content_extractors = []
+
+		p = Page(url=some_url, owner=a_user)
+
+		expect(page.transform).process(p).and_raise(TransformError("transform failed"))
+		expect(p).error("transform failed")
+
+		p.fetch_content()
+		self.assertTrue(p.transformed)
+	
+	def test_reset_should_clear_all_content(self):
+		p = Page(url=some_url, owner=a_user)
+		p.content = "content!"
+		p.raw_content = "raw content!"
+		p.title = "title"
+		
+		p.update(force=True)
+		self.assertNone(p.content)
+		self.assertNone(p.raw_content)
+		self.assertEqual(p.title, "[localhost saved item]")
+
+	def test_store_best_content_should_do_nothing_if_not_all_processors_have_completed(self):
+		p = Page(url=some_url, owner=a_user)
+		replace(page).content_extractors = [1,2,3,4,5]
+		page.store_best_content(p.key())
+		when(Content).for_url(p.url).then_return([1,2,3,4])
+
+		expect(page).set_content(p.key(), anything).never()
+		page.store_best_content(p.key(), 1)
+
+	def test_store_best_content_should_do_so_if_all_extractors_are_complete(self):
+		p = Page(url=some_url, owner=a_user)
+		replace(page).content_extractors = [1,2,3,4,5]
+		page.store_best_content(p.key())
+		when(Content).for_url(p.url).then_return([1, 6, 10, 8, 4])
+
+		expect(page).set_content(p.key(), 10)
+		page.store_best_content(p.key())
 
 class PageTest(TestCase):
 	def test_should_load_well_formed_page(self):
@@ -219,7 +289,7 @@ class PageTest(TestCase):
 		self.assertEqual(p.title, "foo bar")
 
 
-def new_page(content=None, url='http://localhost/dontcare'):
+def new_page(content=None, url=some_url):
 	p = page.Page(url=url, owner=a_user)
 	if content is None:
 		p.put()

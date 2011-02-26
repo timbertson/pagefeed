@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.ext import deferred
 
 from google.appengine.api.urlfetch import fetch, DownloadError
 from view_helpers import render, view
@@ -17,10 +18,23 @@ import re
 
 MESSAGE_TYPES = ['error', 'info']
 
+# basic flow of a Page model:
+# step 1: add page with URL
+#  - does not show in RSS, content is None
+#  - does appear in API (android app), but with no content
+# step 2: fetch raw html
+#  - raw_content is populated
+# step 3: if transforms are defined, perform transforms
+#  - if this fails, an error is logged and applied_transforms is just set to True
+# step 4 to 4+n: extract content using all available content extractors
+# step 5+n: get best content from steps above, and save it as self.content
+#  - now page will appear in RSS, and content will appear in API
+
 class Page(BaseModel):
 	url = db.URLProperty(required=True)
 	_content_url = db.URLProperty()
 	content = db.TextProperty()
+	raw_content = db.TextProperty()
 	title = db.StringProperty()
 	owner = db.UserProperty(required=True)
 	date = db.DateTimeProperty(auto_now_add=True)
@@ -42,8 +56,6 @@ class Page(BaseModel):
 			page = parser.Document(raw_content, url=self.base_href, notify=self.info)
 			self.title = page.title() or self.default_title()
 			self.put(failsafe=True) # ensure the datastore has *something*, even if parsing never completes
-			#TODO: get summary working with decent performance
-			#self.content = page.summary()
 			self.content = page.content()
 		except parser.Unparseable, e:
 			self._failed("failed to parse content")
