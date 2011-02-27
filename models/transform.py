@@ -60,6 +60,7 @@ class Transform(PolyModel, BaseModel):
 class FollowTransform(Transform):
 	desc = "follow link"
 	def apply(self, page):
+
 		links = apply_selector(page.soup, self.selector)
 		if len(links) < 1:
 			raise TransformError("no links found")

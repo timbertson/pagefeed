@@ -1,46 +1,45 @@
 from test_helpers import *
-from models import page, Transform
-from models.page import Page
+from models import page
+from models.page import Page, Content
+from google.appengine.ext import deferred
+from google.appengine.ext import db
 
 some_url = 'http://localhost/dontcare'
 
-class PageLifecycleTest(TestCase):
+class CleanDBTest(TestCase):
+	def setUp(self):
+		super(CleanDBTest, self).setUp()
+		db.delete(Page.all())
+		db.delete(Content.all())
+
+class PageLifecycleTest(CleanDBTest):
 	def setUp(self):
 		super(PageLifecycleTest, self).setUp()
-		self.defer_mock = mock(page.deferred).defer
+		self.defer_mock = mock(deferred).defer
+		when(deferred).defer(*any_args, **any_kwargs).then_return(None)
 
 	def test_page_should_start_with_no_content(self):
 		p = Page(url=some_url, owner=a_user)
 		self.assertEquals(p.content, None)
-		self.assertNotNone(p.key())
 	
-	def test_page_creation_should_launch_a_task_to_fetch_data(self):
+	def test_page_should_launch_tasks_to_populate_data(self):
 		p = Page(url=some_url, owner=a_user)
-		expect(defer_mock).defer.once().with_args(page.fetch_raw_content, p.key())
-
-	def test_fetch_data_should_launch_content_extraction_tasks(self):
-		extractor1, extractor2 = mock(), mock()
-		modify(page).content_extractors = [extractor1, extractor2]
-
-		p = Page(url=some_url, owner=a_user)
-
+		p.put()
 		expect(page.Transform).process(p)
-		expect(self.defer_mock).defer(extractor1, p.key())
-		expect(self.defer_mock).defer(extractor2, p.key())
-		expect(self.defer_mock).defer(page.store_best_content, p.key())
+		expect(deferred).defer(page.task_extract_content, 'native', p.key())
+		expect(deferred).defer(page.task_extract_content, 'view_text', p.key())
+		p.start_content_population()
 
-		p.fetch_content()
-	
 	def test_should_log_error_and_ignore_transforms_if_they_fail(self):
 		modify(page).content_extractors = []
 
 		p = Page(url=some_url, owner=a_user)
 
-		expect(page.transform).process(p).and_raise(TransformError("transform failed"))
+		expect(page.Transform).process(p).and_raise(page.TransformError("transform failed"))
 		expect(p).error("transform failed")
+		expect(deferred).defer(page.task_extract_content, *any_args).twice()
 
-		p.fetch_content()
-		self.assertTrue(p.transformed)
+		p.start_content_population()
 	
 	def test_reset_should_clear_all_content(self):
 		p = Page(url=some_url, owner=a_user)
@@ -49,29 +48,69 @@ class PageLifecycleTest(TestCase):
 		p.title = "title"
 		
 		p.update(force=True)
-		self.assertNone(p.content)
-		self.assertNone(p.raw_content)
-		self.assertEqual(p.title, "[localhost saved item]")
+		self.assertEquals(p.content, None)
+		self.assertEquals(p.raw_content, None)
+		self.assertEqual(p.title, "title")
 
 	def test_store_best_content_should_do_nothing_if_not_all_processors_have_completed(self):
 		p = Page(url=some_url, owner=a_user)
-		replace(page).content_extractors = [1,2,3,4,5]
-		page.store_best_content(p.key())
-		when(Content).for_url(p.url).then_return([1,2,3,4])
+		p.put()
+		modify(page).content_extractors = [1,2, 3, 4, 5, 6]
+		when(Content).for_url(p.url).then_return([Content(url=some_url)])
 
-		expect(page).set_content(p.key(), anything).never()
-		page.store_best_content(p.key(), 1)
+		page.task_store_best_content(p.key())
+		p = Page.get(p.key())
+		self.assertEquals(p._title, None)
+		self.assertEquals(p.content, None)
+
+	def test_store_best_content_should_store_empty_values_if_forced(self):
+		p = Page(url=some_url, owner=a_user)
+		p.put()
+		modify(page).content_extractors = [1,2, 3, 4, 5, 6]
+		when(Content).for_url(p.url).then_return([])
+
+		page.task_store_best_content(p.key(), force=True)
+		p = Page.get(p.key())
+		self.assertEquals(p._title, '[localhost saved item]')
+		self.assertEquals(p.content, '')
 
 	def test_store_best_content_should_do_so_if_all_extractors_are_complete(self):
 		p = Page(url=some_url, owner=a_user)
-		replace(page).content_extractors = [1,2,3,4,5]
-		page.store_best_content(p.key())
-		when(Content).for_url(p.url).then_return([1, 6, 10, 8, 4])
+		p.put()
+		modify(page).content_extractors = [1,2]
 
-		expect(page).set_content(p.key(), 10)
-		page.store_best_content(p.key())
+		best_content = Content(url=some_url, title='best title', body='best body')
+		worst_content = Content(url=some_url)
 
-class PageTest(TestCase):
+		contents = [best_content, worst_content]
+		map(lambda x: expect(x).delete(), contents)
+
+		when(Content).for_url(p.url).then_return(contents)
+
+		page.task_store_best_content(p.key())
+
+		p = Page.get(p.key())
+		self.assertEquals(p.title, "best title")
+		self.assertEquals(p.content, "best body")
+	
+	def test_store_best_content_should_do_nothing_if_content_is_already_set(self):
+		p = Page(url=some_url, owner=a_user, content='some content')
+		p.put()
+
+		expect(Content).for_url.never().and_return([])
+
+		page.task_store_best_content(p.key())
+
+	
+class PageTest(CleanDBTest):
+	def test_find_complete_should_skip_incomplete_pages(self):
+		incomplete = Page(url=some_url, owner=a_user)
+		complete = Page(url=some_url, owner=a_user, content='')
+		[x.put() for x in (incomplete, complete)]
+		pages = list(Page.find_complete(a_user))
+		self.assertEquals(len(pages), 1)
+		self.assertEqual(pages[0].key(), complete.key())
+
 	def test_should_load_well_formed_page(self):
 		content = """
 			<html>
@@ -79,9 +118,10 @@ class PageTest(TestCase):
 			<body>the body!</body>
 			</html>
 			"""
-		result = mock('result').with_children(status_code=200, content=content)
+		result = mock('result')
+		modify(result).children(status_code=200, content=content)
 		url = 'http://localhost/some/path'
-		mock_on(page).fetch.is_expected.with_(url).returning(result.raw)
+		expect(page).fetch(url, *any_args).and_return(result)
 		
 		p = new_page(url=url)
 		self.assertEqual(p.title, 'the title!')
@@ -89,10 +129,11 @@ class PageTest(TestCase):
 		self.assertFalse(p.errors)
 		
 	def test_should_omit_page_fragment_from_request(self):
-		result = mock('result').with_children(status_code=200, content='blah')
+		result = mock('result')
+		modify(result).children(status_code=200, content='blah')
 		url = 'http://localhost/some/path'
 		full_url = url + "#anchor"
-		mock_on(page).fetch.is_expected.with_(url).returning(result.raw)
+		expect(page).fetch(url).and_return(result)
 		
 		p = new_page(url=full_url)
 		self.assertEqual(p.url, full_url)
