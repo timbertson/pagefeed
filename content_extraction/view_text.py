@@ -20,8 +20,15 @@ def extract(page):
 	logging.info("got JSON response with keys: %s" % (response.keys(),))
 
 	try:
-		content.body = response['content']
+		#TODO: remove this hack once viewtext.org adds base href to links.
+		# Although, we should prbably still clean content - script tags and such..
+		body = response['content']
+		from lib import page_parser
+		body = page_parser.get_body(page_parser.parse(body))
+
+		content.body = body
 		content.title = response['title']
 	except KeyError, e:
 		raise deferred.PermanentTaskFailure("%s: %s" % (type(e), e))
 	content.put()
+	logging.info("fetched %r with native extractor, got content size %s" % (url,content.size))

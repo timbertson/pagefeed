@@ -11,7 +11,7 @@ from logging import debug, info, warning, error
 from transform import Transform, TransformError
 from base import BaseModel
 from content import Content
-import lib.readability as parser
+from lib.page_parser import ascii
 
 
 MESSAGE_TYPES = ['error', 'info']
@@ -67,6 +67,7 @@ def task_store_best_content(page_key, force=False):
 	map(lambda content:content.delete(), contents_found)
 
 class Page(BaseModel):
+	latest_version = 1
 	url = db.URLProperty(required=True)
 	_content_url = db.URLProperty()
 	content = db.TextProperty()
@@ -77,12 +78,31 @@ class Page(BaseModel):
 	_messages = db.StringListProperty()
 
 	def __init__(self, *a, **k):
+		post_super_calls = []
+		if 'version' in k:
+			if k['version'] < self.latest_version:
+				for x in range(k['version'], self.latest_version):
+					info("upgrading model from version %s to %s" % (x, x+1))
+					actions = getattr(self, "upgrade_%s_to_%s" % (x, x+1))(k)
+					k['version'] = x+1
+					if actions:
+						post_super_calls += actions
+
 		super(type(self), self).__init__(*a, **k)
 		self.transformed = False
+		map(lambda x: x(), post_super_calls)
+	
+	def upgrade_0_to_1(self, keys):
+		# 0 -> 1 migration:
+		# title & content are potentially populated differently
+		keys.pop('title', None)
+		keys.pop('content', None)
+		keys.pop('_content_url', None)
+		return [self.put, self.start_content_population]
 
 	def default_title(self):
 		try:
-			return "[%s saved item]" % (parser.ascii(self.host),)
+			return "[%s saved item]" % (ascii(self.host),)
 		except StandardError:
 			return '[pagefeed saved item]'
 

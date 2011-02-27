@@ -110,7 +110,15 @@ class PageTest(CleanDBTest):
 		pages = list(Page.find_complete(a_user))
 		self.assertEquals(len(pages), 1)
 		self.assertEqual(pages[0].key(), complete.key())
+	
 
+	#TODO...
+	def test_should_default_to_v1_page(self):
+		pass
+	def test_should_convert_v0_page_to_v1_page(self):
+		pass
+	
+	##TODO: many of these tests should be migrated to tests on the page_parser functionality
 	def test_should_load_well_formed_page(self):
 		content = """
 			<html>
