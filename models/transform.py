@@ -14,6 +14,8 @@ class TransformError(RuntimeError):
 	pass
 
 class Transform(PolyModel, BaseModel):
+	latest_version = 0
+	version = db.IntegerProperty(default=latest_version)
 	host_match = db.StringProperty(required=True)
 	selector = db.StringProperty(required=True)
 	owner = db.UserProperty(required=True)

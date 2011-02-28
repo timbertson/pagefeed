@@ -12,6 +12,7 @@ from transform import Transform, TransformError
 from base import BaseModel
 from content import Content
 from lib.page_parser import ascii
+import pagefeed_path
 
 
 MESSAGE_TYPES = ['error', 'info']
@@ -30,29 +31,30 @@ CONTENT_EXTRACTORS = ['native', 'view_text']
 
 
 def get_content_extractor(name):
-	import content_extractors
-	return getattr(content_extractors, name)
+	import content_extraction
+	return getattr(content_extraction, name)
 
 def task_extract_content(extractor, page_key):
 	page = Page.get(page_key)
-	if page.content:
-		info("skipping content extraction [%s] for page %s, as content is already populated" %
+	if not page.pending:
+		info("skipping content extraction [%s] for page %s, as it is not pending" %
 			(extractor, page_key))
 		return
 	try:
 		get_content_extractor(extractor).extract(page)
 	except Exception, e:
 		error("content extraction %s for page:%s failed with error <%s: %s>" %
-			(extractor.__name__, page_key, type(e), e))
+			(extractor, page_key, type(e), e))
 		raise
 	finally:
 		deferred.defer(task_store_best_content, page_key)
 
 def task_store_best_content(page_key, force=False):
 	page = Page.get(page_key)
-	if page.content:
+	if not page.pending:
 		return
 	contents_found = Content.for_url(page.content_url)
+	info("content_found == %r" % (contents_found,))
 	if force is False and len(contents_found) < len(CONTENT_EXTRACTORS):
 		return
 	debug("assigning best content for page: %s" % page)
@@ -61,16 +63,21 @@ def task_store_best_content(page_key, force=False):
 	except ValueError:
 		error("failed to save content for page %s - no contents were retrieved")
 		best_content = Content(url=page.content_url, title=page.default_title(), body="")
-	page.content = best_content.body
-	page.title = best_content.title
-	page.put()
+	try:
+		page.content = best_content.body
+		page.title = best_content.title
+	finally:
+		page.pending = False
+		page.put()
 	map(lambda content:content.delete(), contents_found)
 
 class Page(BaseModel):
-	latest_version = 1
+	latest_version = int(1)
+	version = db.IntegerProperty(default=latest_version)
 	url = db.URLProperty(required=True)
 	_content_url = db.URLProperty()
 	content = db.TextProperty()
+	pending = db.BooleanProperty(default=True)
 	raw_content = db.TextProperty() # TODO: should not be stored on the page itself; it's an intermediate result
 	_title = db.StringProperty()
 	owner = db.UserProperty(required=True)
@@ -118,11 +125,11 @@ class Page(BaseModel):
 		return self.raw_content
 
 	def start_content_population(self):
+		self.pending = True
 		self.put()
 		self.apply_transforms()
 		for extractor in CONTENT_EXTRACTORS:
-			print "queuing %s" % (extractor,)
-			print repr(deferred.defer)
+			info("queuing extractor %s for page %s" % (extractor,self.key()))
 			deferred.defer(task_extract_content, extractor, self.key())
 			deferred.defer(task_store_best_content, self.key(), force=True, _countdown = 60 * 10)
 
@@ -154,7 +161,7 @@ class Page(BaseModel):
 		if force or self.errors:
 			info("page %s: update...." % (self.content_url,))
 			self._reset()
-			self.put()
+			self.start_content_population()
 	
 	def json_attrs(self):
 		pagetime = int(time.mktime(self.date.timetuple()))

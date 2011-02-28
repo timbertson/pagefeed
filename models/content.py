@@ -3,11 +3,17 @@ from base import BaseModel
 from google.appengine.ext import db
 
 class Content(BaseModel):
+	latest_version = 0
+	version = db.IntegerProperty(default=latest_version)
 	min_size = 1000 # characters
 	url = db.URLProperty(required=True)
 	title = db.StringProperty()
 	body = db.TextProperty()
 	source = db.StringProperty()
+
+	def __repr__(self):
+		return "<Content (%s) for %s: title=%r, length=%s>" % (
+			self.source, self.url, self.title, self.get_size())
 
 	def __cmp__(self, other):
 		both = (self, other)
@@ -32,7 +38,7 @@ class Content(BaseModel):
 	
 	@classmethod
 	def for_url(cls, url):
-		return db.Query(cls).filter('url =', url).get()
+		return db.Query(cls).filter('url =', url).fetch(100)
 
 	@classmethod
 	def already_fetched(cls, url, source):
