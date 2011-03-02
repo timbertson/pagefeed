@@ -53,7 +53,7 @@ class TransformTest(TestCase):
 			</body>
 			"""
 		page = mock('page').with_children(soup=b_soup(html), host='')
-		page.expects('replace_with_contents_from').with_('http://linked_url')
+		expect(page).replace_with_contents_from('http://linked_url')
 		xform.apply(page.raw)
 
 	@ignore
@@ -67,9 +67,9 @@ class TransformTest(TestCase):
 				</div>
 			</body>
 			"""
-		page = mock('page').with_children(soup=b_soup())
-		page.does_not_expect('replace_link')
-		page.expects("info").with_("FollowTransform: couldn't find any items matching `%s`"  % (selector,))
+		page = mock('page').with_children(soup=b_soup(html))
+		expect(page).replace_link.never()
+		expect(page).info("FollowTransform: couldn't find any items matching `%s`"  % (selector,))
 		xform.apply(page)
 
 class SelectorTest(TestCase):

@@ -16,13 +16,15 @@ class FeedTest(TestCase):
 		userid = UserID.get(email)
 		page = fixtures.stub_page()
 		page.title = 'the title!'
-		mock_on(Page).find_all.is_expected.with_(fixtures.a_user)
+		expect(Page).find_all(fixtures.a_user)
 		response = self.get_feed(email, userid.handle)
 		response.mustcontain('the title!')
 
 	def test_should_not_display_feeds_for_an_illegitimate_user(self):
 		email = fixtures.a_user.email()
-		userid = UserID.get(email)
-		mock_on(Page).find_all.is_not_expected
+		expect(Page).find_all.never()
 		self.get_feed(email, '123', status=403)
+	
+	def test_should_omit_feeds_that_are_still_pending_content(self):
+		pass
 

@@ -49,7 +49,7 @@ class TransformAddTest(TestCase):
 		create_params = kw.copy()
 		create_params['owner'] = fixtures.a_user
 		
-		mock_on(transform.Transform).create.is_expected.with_('follow', **create_params).returning(xform.raw)
+		when(transform.Transform).create('follow', **create_params).then_return(xform.raw)
 		response = self.add(**kw)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 

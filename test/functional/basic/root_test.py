@@ -41,8 +41,8 @@ class RootTest(TestCase):
 			self.assertEqual(url, page.url)
 			return page
 			
-		mock_on(Page).find.with_action(check)
-		mock_on(page).delete.is_expected
+		expect(Page).find.and_call(check)
+		expect(page).delete()
 
 		response = delete_form.submit().follow()
 		self.assertEqual(response.request.url, 'http://localhost/')
@@ -57,8 +57,8 @@ class RootTest(TestCase):
 			self.assertEqual(url, page.url)
 			return page
 			
-		mock_on(Page).find.with_action(check)
-		mock_on(page).update.is_expected.with_(force=True)
+		expect(Page).find.and_call(check)
+		expect(page).update(force=True)
 		
 		response = update_form.submit().follow()
 		self.assertEqual(response.request.url, 'http://localhost/')
