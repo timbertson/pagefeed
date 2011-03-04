@@ -1,6 +1,5 @@
 from test_helpers import *
-from pagefeed.models import page
-from pagefeed.models.page import Page, Content
+from pagefeed.models import page, Page, Transform, Content
 from google.appengine.ext import deferred
 from google.appengine.ext import db
 
@@ -94,10 +93,10 @@ class PageLifecycleTest(CleanDBTest):
 		self.assertEquals(p.content, "best body")
 	
 	def test_store_best_content_should_do_nothing_if_content_is_already_set(self):
-		p = Page(url=some_url, owner=a_user, content='some content')
+		p = Page(url=some_url, owner=a_user, pending=False)
 		p.put()
 
-		expect(Content).for_url.never().and_return([])
+		expect(Content).for_url.never()
 
 		page.task_store_best_content(p.key())
 
@@ -132,6 +131,7 @@ class PageTest(CleanDBTest):
 		pass
 	
 	##TODO: many of these tests should be migrated to tests on the page_parser functionality
+	@ignore("content extraction")
 	def test_should_load_well_formed_page(self):
 		content = """
 			<html>
@@ -154,14 +154,16 @@ class PageTest(CleanDBTest):
 		modify(result).children(status_code=200, content='blah')
 		url = 'http://localhost/some/path'
 		full_url = url + "#anchor"
-		expect(page).fetch(url).and_return(result)
+		expect(page).fetch(url, **any_kwargs).and_return(result)
 		
 		p = new_page(url=full_url)
+		p.get_raw_content()
 		self.assertEqual(p.url, full_url)
-		self.assertEqual(p.content, 'blah')
+		self.assertEqual(p.raw_content, 'blah')
 		self.assertFalse(p.errors)
 		
 
+	@pending("content extration test")
 	def test_should_absoluteize_links_and_images(self):
 		content = """
 			<html>
@@ -188,6 +190,7 @@ class PageTest(CleanDBTest):
 		self.assertTrue('<a href="http://google.com/abs.html">' in p.content)
 		self.assertTrue('<img src="%spath/to/path2.jpg" />' % base in p.content)
 
+	@ignore("content extraction")
 	def test_should_remove_a_bunch_of_unwanted_html_attributes(self):
 		stub_result("""
 				<html>
@@ -234,6 +237,7 @@ class PageTest(CleanDBTest):
 		self.assertTrue("no title..." in p.content)
 		self.assertFalse(p.errors)
 
+	@pending("content extraction")
 	def test_should_fall_back_to_entire_html_if_it_has_no_body(self):
 		html = "<html><title>no body</title></html>"
 		stub_result(html)
@@ -243,6 +247,7 @@ class PageTest(CleanDBTest):
 		self.assertFalse(p.errors)
 
 
+	@pending("content extraction")
 	def test_should_discard_html_on_completely_unparseable(self):
 		html = "<html></scr + ipt>"
 		stub_result(html)
@@ -250,6 +255,7 @@ class PageTest(CleanDBTest):
 		self.assertEqual(p.content, '')
 		self.assertTrue(p.errors)
 	
+	@pending("content extraction")
 	def test_should_strip_out_script_and_style_and_link_tags(self):
 		html = "<html><body><script></script><style></style><link /></body>"
 		stub_result(html)
@@ -257,6 +263,7 @@ class PageTest(CleanDBTest):
 		self.assertEqual(p.content, "<body></body>")
 		self.assertFalse(p.errors)
 	
+	@ignore
 	def test_should_apply_all_matching_transforms(self):
 		filter1 = mock('filter1')
 		filter2 = mock('filter2')
@@ -264,42 +271,46 @@ class PageTest(CleanDBTest):
 
 		p = page.Page(owner=a_user, url='http://sub.localhost.com/some/path/to/file.html')
 		response = mock('response').with_children(status_code=200, content='initial content')
-		mock_on(page).fetch.returning(response.raw)
+		when(page).fetch.then_return(response)
 
-		mock_on(Transform).find_all.with_(user=a_user, host='sub.localhost.com').is_expected.returning(filters)
-		filter1.expects('apply').with_(p)
-		filter2.expects('apply').with_(p)
+		expect(Transform).find_all(user=a_user, host='sub.localhost.com').then_return(filters)
+		expect(filter1).apply(p)
+		expect(filter2).apply(p)
 		
 		p.put()
 
+	@ignore
 	def test_should_fetch_content_from_new_url(self):
 		old_url = 'http://old_url'
 		new_url = 'http://new_url'
 		p = new_page(content='initial content', url=old_url)
 
 		response = mock('response').with_children(status_code=200, content='new content')
-		mock_on(page).fetch.is_expected.with_(new_url).returning(response.raw)
+		expect(page).fetch(new_url).and_return(response.raw)
 		p.replace_with_contents_from(new_url)
 
 		self.assertEqual(p.url, old_url)
 		self.assertEqual(p.content, 'new content')
 	
-	@ignore
+	@ignore("can't implement this with beautifulsoup yet...")
 	def test_should_extract_xpath_elements(self):
 		pass
 	
+	@pending('content extraction')
 	def test_should_note_an_error_when_download_fails(self):
 		stub_result('', status_code = 400)
 		p = new_page()
 		self.assertTrue(p.errors)
 
+	@ignore('content extraction')
 	def test_should_retry_a_failed_download_on_update(self):
 		stub_result('', status_code=404)
-		mock_on(page).fetch.is_expected.twice
+		expect(page).fetch.twice()
 
 		p = new_page()
 		p.update()
 
+	@pending('content extraction')
 	def test_should_not_retry_a_successful_download_on_update(self):
 		stub_result('')
 		mock_on(page).fetch.is_expected.once
@@ -311,6 +322,7 @@ class PageTest(CleanDBTest):
 	def test_should_update_date_on_fetch(self):
 		pass
 
+	@pending("content extraction")
 	def test_should_retry_a_successful_download_on_update_if_forced(self):
 		stub_result('')
 		mock_on(page).fetch.is_expected.twice
@@ -318,11 +330,13 @@ class PageTest(CleanDBTest):
 		p = new_page()
 		p.update(force=True)
 
+	@ignore
 	def test_should_render_as_html(self):
 		url = 'http://my_url/base_path/resource'
 		p = new_page('<title>t</title><body>b</body>', url=url)
 		self.assertEqual(p.html.strip(), '<body>b</body>')
 
+	@ignore("content extraction")
 	def test_rendered_page_should_not_include_unparseable_html(self):
 		url = 'http://my_url'
 		orig_html = '<title>t</title><body>b<scr + ipt /></body>'
@@ -332,11 +346,13 @@ class PageTest(CleanDBTest):
 		self.assertTrue('an error occurred' in html, html)
 		self.assertFalse(orig_html in html, html)
 
+	@ignore("content extraction")
 	def test_should_have_soup_and_host_attributes(self):
 		p = new_page('<body><p>woo!</p></body>', url='http://google.com/some/page')
 		self.assertEqual(p.host, 'google.com')
 		self.assertEqual(p.soup.body.p.string, 'woo!')
 
+	@ignore("content extraction")
 	def test_should_have_base_href_attribute(self):
 		def assert_base(url, expected_base):
 			self.assertEqual(new_page(content='', url=url).base_href, expected_base)
@@ -346,6 +362,7 @@ class PageTest(CleanDBTest):
 		assert_base('http://localhost/', 'http://localhost/')
 		assert_base('http://localhost', 'http://localhost/')
 
+	@ignore
 	def test_should_accept_multiline_titles(self):
 		p = new_page("<title>foo\nbar</title>")
 		self.assertEqual(p.title, "foo bar")
@@ -361,7 +378,7 @@ def new_page(content=None, url=some_url):
 
 def stub_result(content, status_code=200):
 	result = mock('result').with_children(status_code=status_code, content=content)
-	mock_on(page).fetch.returning(result.raw)
+	when(page).fetch.then_return(result)
 	return result
 
 

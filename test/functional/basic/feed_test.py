@@ -11,13 +11,14 @@ class FeedTest(TestCase):
 		print repr(fixtures)
 		return fixtures.app().get('/feed/%s-%s/' % (secret, email), **kwargs)
 		
-	def test_should_display_feeds_for_a_user(self):
+	def test_should_display_complete_feeds_for_a_user(self):
 		email = fixtures.a_user.email()
 		userid = UserID.get(email)
 		page = fixtures.stub_page()
 		page.title = 'the title!'
-		expect(Page).find_all(fixtures.a_user)
+		expect(Page).find_complete(fixtures.a_user).and_return([page])
 		response = self.get_feed(email, userid.handle)
+		print repr(response.body)
 		response.mustcontain('the title!')
 
 	def test_should_not_display_feeds_for_an_illegitimate_user(self):
@@ -25,6 +26,3 @@ class FeedTest(TestCase):
 		expect(Page).find_all.never()
 		self.get_feed(email, '123', status=403)
 	
-	def test_should_omit_feeds_that_are_still_pending_content(self):
-		pass
-

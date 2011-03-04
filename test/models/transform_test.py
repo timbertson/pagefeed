@@ -40,6 +40,7 @@ class TransformTest(TestCase):
 		self.assertEqual(len(follows), 1)
 		self.assertEqual(orig_follow, follows[0])
 
+	@ignore("content extraction")
 	def test_should_follow_url_for_follow_action(self):
 		selector = "div[class=content]|a[1]"
 		xform = transform.FollowTransform(owner=fixtures.a_user, selector=selector, host_match='localhost', name='blah')

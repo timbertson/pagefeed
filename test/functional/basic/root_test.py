@@ -13,7 +13,7 @@ class RootTest(TestCase):
 		page = fixtures.stub_page()
 		response = fixtures.app().get('/')
 		
-		response.mustcontain('Welcome to PageFeed, foo')
+		response.mustcontain('Welcome to PageFeed')
 		response.mustcontain(page.title)
 	
 	def test_should_link_to_feed_for_a_logged_in_user(self):
@@ -26,8 +26,7 @@ class RootTest(TestCase):
 		email = user.email()
 		user_handle = UserID.get(email).handle
 		
-		feed_link = '/feed/%s-%s/' % (user_handle, urllib2.quote(email))
-		content = response.body
+		feed_link = 'https://localhost/feed/%s-%s/' % (user_handle, urllib2.quote(email))
 		response.mustcontain('<link href="%s" type="application/rss+xml"' % (feed_link))
 		response.mustcontain('<a href="%s"' % feed_link)
 	

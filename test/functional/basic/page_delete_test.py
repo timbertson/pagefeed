@@ -8,9 +8,9 @@ class PageDeleteTest(TestCase):
 	def test_should_delete_a_page_and_redirect_to_root(self):
 		url = 'http://localhost/page_to_delete'
 		page = fixtures.stub_page(url=url)
-		mock_on(Page).find.is_expected.with_(owner=fixtures.a_user, url=url).returning(page)
+		expect(Page).find(owner=fixtures.a_user, url=url).and_return(page)
 
-		mock_on(page).delete.is_expected
+		expect(page).delete()
 
 		response = self.delete(url)
 		print "content: %s" % (response.body,)
@@ -18,7 +18,7 @@ class PageDeleteTest(TestCase):
 
 	def test_should_not_return_404_if_there_is_no_such_url(self):
 		url = 'http://localhost/this_page_does_not_exist'
-		mock_on(Page).find.is_expected.with_(owner=fixtures.a_user, url=url).returning(None)
-		response = self.delete(url, status=404)
+		expect(Page).find(owner=fixtures.a_user, url=url).and_return(None)
+		self.delete(url, status=404)
 
 
