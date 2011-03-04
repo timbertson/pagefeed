@@ -1,7 +1,7 @@
 
 from mocktest import *
 
-from models.page import Page
+from pagefeed.models.page import Page
 from user import a_user
 from app import app
 

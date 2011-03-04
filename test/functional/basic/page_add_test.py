@@ -1,5 +1,5 @@
 from test_helpers import *
-from models import page
+from pagefeed.models import page
 
 class PageAddTest(TestCase):
 	def add(self, url):

@@ -1,5 +1,5 @@
 import urllib2
-from models import Page, UserID
+from pagefeed.models import Page, UserID
 
 from base import *
 

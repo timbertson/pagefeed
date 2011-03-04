@@ -2,7 +2,7 @@ import cgi
 from google.appengine.ext import db
 
 from base import *
-from models import Transform
+from pagefeed.models import Transform
 
 class TransformHandler(BaseHandler):
 	root = "/transform/"

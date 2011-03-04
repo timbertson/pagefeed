@@ -6,7 +6,7 @@ HEADER = 'header'
 LAYOUT = 'layout'
 
 def view(*parts):
-	return path.join(path.dirname(__file__), 'views', *parts)
+	return path.join(path.dirname(__file__), '..', 'views', *parts)
 
 def render(*args):
 	"""render(dir, [dir, [ ... ]], values)"""

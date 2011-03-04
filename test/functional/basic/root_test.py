@@ -1,7 +1,7 @@
 import urllib2
 from google.appengine.api import users
 
-from models import Page, UserID
+from pagefeed.models import Page, UserID
 
 from test_helpers import *
 

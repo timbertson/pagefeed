@@ -5,9 +5,9 @@ from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.ext.db.polymodel import PolyModel
 
-from lib.selector import apply_selector
-from view_helpers import view
-from lib.url_helpers import absolute_url
+from pagefeed.lib.selector import apply_selector
+from pagefeed.view_helpers import view
+from pagefeed.lib.url_helpers import absolute_url
 from base import BaseModel
 
 class TransformError(RuntimeError):

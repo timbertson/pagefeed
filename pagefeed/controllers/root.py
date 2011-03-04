@@ -3,7 +3,7 @@ import urllib2
 from base import *
 from pagination import PaginatedHandler
 
-from models import Page, UserID, Feed
+from pagefeed.models import Page, UserID, Feed
 
 class MainHandler(PaginatedHandler):
 	def all_instances(self):

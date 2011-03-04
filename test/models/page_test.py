@@ -1,6 +1,6 @@
 from test_helpers import *
-from models import page
-from models.page import Page, Content
+from pagefeed.models import page
+from pagefeed.models.page import Page, Content
 from google.appengine.ext import deferred
 from google.appengine.ext import db
 

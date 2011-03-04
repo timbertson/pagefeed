@@ -1,8 +1,8 @@
 import cgi
 from test_helpers import *
 
-from models.page import Page
-from models.user import UserID
+from pagefeed.models.page import Page
+from pagefeed.models.user import UserID
 
 class FeedTest(TestCase):
 	def get_feed(self, email, secret, **kwargs):

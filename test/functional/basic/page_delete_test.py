@@ -1,5 +1,5 @@
 from test_helpers import *
-from models.page import Page
+from pagefeed.models.page import Page
 
 class PageDeleteTest(TestCase):
 	def delete(self, url, **kwargs):

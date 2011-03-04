@@ -1,12 +1,12 @@
 from google.appengine.ext import webapp
 from google.appengine.api import users
 
-from server_errors import HttpError, RedirectError
+from pagefeed.server_errors import HttpError, RedirectError
 
 import logging
 from logging import debug, info, error
-from view_helpers import view, render, render_page
-from lib.url_helpers import host_for_url
+from pagefeed.view_helpers import view, render, render_page
+from pagefeed.lib.url_helpers import host_for_url
 
 class BaseHandler(webapp.RequestHandler):
 	def handle_exception(self, exc, *a, **k):

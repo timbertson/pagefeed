@@ -1,6 +1,6 @@
 from test_helpers import *
 from pagefeed.models import transform
-from lib.BeautifulSoup import BeautifulSoup as b_soup
+from pagefeed.lib.BeautifulSoup import BeautifulSoup as b_soup
 
 class TransformTest(TestCase):
 	def tearDown(self):

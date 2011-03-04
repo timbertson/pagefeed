@@ -1,5 +1,5 @@
 from test_helpers import *
-from models import transform, Transform
+from pagefeed.models import transform, Transform
 
 class TransformAddTest(TestCase):
 	path = "/transform/"

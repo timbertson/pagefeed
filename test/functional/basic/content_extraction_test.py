@@ -1,5 +1,5 @@
 from test_helpers import *
-from models import page
+from pagefeed.models import page
 
 class ContentExtractionTest(object):
 	def test_should_add_a_new_page_without_content():

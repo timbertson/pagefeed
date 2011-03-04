@@ -1,5 +1,5 @@
 from base import *
-from models import Feed
+from pagefeed.models import Feed
 
 class RecipeHandler(BaseHandler):
 	def get(self):

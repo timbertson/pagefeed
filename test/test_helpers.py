@@ -2,12 +2,16 @@ from os import path
 import sys
 from mocktest import *
 
-import console
+base_path = path.abspath(path.join(path.dirname(__file__), '..'))
+if not base_path in sys.path:
+	sys.path.insert(0, base_path)
+
+from pagefeed import console
 console.gae()
 
 import fixtures
 from fixtures import *
-from lib.BeautifulSoup import BeautifulSoup
+from pagefeed.lib.BeautifulSoup import BeautifulSoup
 
 from google.appengine.api import users
 

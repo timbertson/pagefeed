@@ -1,5 +1,5 @@
-from lib import page_parser
-from models import Content
+from pagefeed.lib import page_parser
+from pagefeed.models import Content
 import logging
 from google.appengine.ext import deferred
 

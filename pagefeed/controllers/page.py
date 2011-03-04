@@ -3,7 +3,7 @@ from django.utils import simplejson as json
 from datetime import datetime
 
 from base import *
-from models import Page
+from pagefeed.models import Page
 
 class PageHandler(BaseHandler):
 	def _add(self, user, url, success = None, force=False):

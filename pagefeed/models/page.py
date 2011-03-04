@@ -2,16 +2,16 @@ from google.appengine.ext import db
 from google.appengine.ext import deferred
 
 from google.appengine.api.urlfetch import fetch, DownloadError
-from view_helpers import render
-from lib.url_helpers import host_for_url
+from pagefeed.view_helpers import render
+from pagefeed.lib.url_helpers import host_for_url
 import time
-from lib.Python26HTMLParser import HTMLParser
+from pagefeed.lib.Python26HTMLParser import HTMLParser
 
 from logging import debug, info, warning, error
 from transform import Transform, TransformError
 from base import BaseModel
 from content import Content
-from lib.page_parser import ascii
+from pagefeed.lib.page_parser import ascii
 import pagefeed_path
 
 
@@ -31,7 +31,7 @@ CONTENT_EXTRACTORS = ['native', 'view_text']
 
 
 def get_content_extractor(name):
-	import content_extraction
+	from pagefeed import content_extraction
 	return getattr(content_extraction, name)
 
 def task_extract_content(extractor, page_key):

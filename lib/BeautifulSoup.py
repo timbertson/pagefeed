@@ -1,1 +1,0 @@
-../readability/readability/BeautifulSoup.py

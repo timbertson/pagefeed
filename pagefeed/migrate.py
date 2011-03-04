@@ -2,7 +2,7 @@ import logging, cgi
 from google.appengine.ext import db, webapp
 from google.appengine.api import users
 
-from models import *
+from pagefeed.models import *
 
 class MigrateHandler(webapp.RequestHandler):
 	def write(self, msg):

@@ -3,16 +3,16 @@
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
-from google.appengine.dist import use_library
-use_library('django', '0.96')
+#from google.appengine.dist import use_library
+#use_library('django', '0.96')
 
-from controllers import *
+from pagefeed.controllers import *
 
 import logging
 import wsgiref.handlers
 from google.appengine.ext import webapp
 from google.appengine.api import users
-from migrate import MigrateHandler
+from pagefeed.migrate import MigrateHandler
 
 
 

@@ -14,6 +14,8 @@ def add_gae_paths():
 	map(add_load_path, paths)
 
 def init_gae():
+	from google.appengine.dist import use_library
+	use_library('django', '0.96')
 	from google.appengine.tools import dev_appserver
 	from google.appengine.tools.dev_appserver_main import \
 		DEFAULT_ARGS, ARG_CLEAR_DATASTORE, ARG_LOG_LEVEL, \
@@ -34,6 +36,6 @@ def init_gae():
 	dev_appserver.SetupStubs(config.application, **gae_opts)
 
 def gae():
-	add_gae_paths()
+	#add_gae_paths()
 	init_gae()
 

@@ -9,7 +9,9 @@
 	</form>
 	<form action="/page/update/" method="POST" class="update ajax unary" id="update_page_{{page.key|escape}}">
 		<input type="hidden" name="url" value="{{page.url|escape}}" />
-		<input type="submit" value="R" />
+			<input type="submit" value="R" />
+		{% if not page.pending %}
+		{% endif %}
 
 		<!-- ajax properties -->
 		<input type="hidden" name="dest" value="li" />

@@ -3,7 +3,8 @@ from google.appengine.api.urlfetch import fetch, DownloadError
 from django.utils import simplejson as json
 import urllib
 from google.appengine.ext import deferred
-from models import Content
+from pagefeed.models import Content
+from pagefeed.lib import page_parser
 
 def extract(page):
 	url = page.content_url
@@ -23,7 +24,6 @@ def extract(page):
 		#TODO: remove this hack once viewtext.org adds base href to links.
 		# Although, we should prbably still clean content - script tags and such..
 		body = response['content']
-		from lib import page_parser
 		body = page_parser.get_body(page_parser.parse(body))
 
 		content.body = body
