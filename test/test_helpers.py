@@ -7,7 +7,7 @@ if not base_path in sys.path:
 	sys.path.insert(0, base_path)
 
 from pagefeed import console
-console.gae()
+console.init_gae()
 
 import fixtures
 from fixtures import *

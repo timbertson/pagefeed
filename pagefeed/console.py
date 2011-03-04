@@ -18,14 +18,10 @@ def init_gae():
 	use_library('django', '0.96')
 	from google.appengine.tools import dev_appserver
 	from google.appengine.tools.dev_appserver_main import \
-		DEFAULT_ARGS, ARG_CLEAR_DATASTORE, ARG_LOG_LEVEL, \
+		DEFAULT_ARGS, ARG_CLEAR_DATASTORE, \
 		ARG_DATASTORE_PATH, ARG_HISTORY_PATH
-	# prefill these into sys.modules
-	import webob
-	import yaml
-	import django
 
-	# and start GAE!
+	# start GAE!
 	gae_opts = DEFAULT_ARGS.copy()
 	gae_opts[ARG_CLEAR_DATASTORE] = True
 	gae_opts[ARG_DATASTORE_PATH] = os.path.join(tempfile.gettempdir(),
@@ -34,8 +30,4 @@ def init_gae():
 		'gae.datastore.history')
 	config, _junk = dev_appserver.LoadAppConfig(os.curdir, {})
 	dev_appserver.SetupStubs(config.application, **gae_opts)
-
-def gae():
-	#add_gae_paths()
-	init_gae()
 
