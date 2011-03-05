@@ -1,6 +1,7 @@
 import operator
 from base import BaseModel
 from google.appengine.ext import db
+from datetime import datetime, timedelta
 
 class Content(BaseModel):
 	latest_version = 0
@@ -10,10 +11,11 @@ class Content(BaseModel):
 	title = db.StringProperty()
 	body = db.TextProperty()
 	source = db.StringProperty()
+	lastmod = db.DateTimeProperty(auto_now_add=True)
 
 	def __repr__(self):
-		return "<Content (%s) for %s: title=%r, length=%s>" % (
-			self.source, self.url, self.title, self.get_size())
+		return "<Content (%s) for %s: title=%r, length=%s, time=%s>" % (
+			self.source, self.url, self.title, self.get_size(), self.lastmod)
 
 	def __cmp__(self, other):
 		both = (self, other)
@@ -47,6 +49,14 @@ class Content(BaseModel):
 	@classmethod
 	def trash(cls, url):
 		map(db.delete, cls.for_url(url))
+
+	@classmethod
+	def purge(cls):
+		one_day_ago = datetime.utcnow() - timedelta(days=1)
+		q = db.Query(cls, keys_only=True).filter('lastmod <', one_day_ago)
+		for batch in iter(lambda: q.fetch(500), []):
+			db.delete(batch)
+
 
 
 

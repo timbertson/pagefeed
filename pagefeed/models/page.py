@@ -36,8 +36,8 @@ def get_content_extractor(name):
 
 def task_extract_content(extractor, page_key):
 	page = Page.get(page_key)
-	if not page.pending:
-		info("skipping content extraction [%s] for page %s, as it is not pending" %
+	if not page.pending or Content.already_fetched(page.content_url, extractor):
+		info("skipping content extraction [%s] for page %s, as it is not pending or already fetched" %
 			(extractor, page_key))
 		return
 	try:
@@ -49,13 +49,20 @@ def task_extract_content(extractor, page_key):
 	finally:
 		deferred.defer(task_store_best_content, page_key)
 
+def contents_already_extracted_for(page):
+	contents = Content.for_url(page.content_url)
+	if len(contents) >= len(CONTENT_EXTRACTORS):
+		return True, contents
+	else:
+		return False, contents
+
 def task_store_best_content(page_key, force=False):
 	page = Page.get(page_key)
 	if not page.pending:
 		return
-	contents_found = Content.for_url(page.content_url)
+	complete, contents_found = contents_already_extracted_for(page)
 	info("contents found == %r" % (contents_found,))
-	if force is False and len(contents_found) < len(CONTENT_EXTRACTORS):
+	if force is False and not complete:
 		return
 	debug("assigning best content for page: %s" % page)
 	try:
@@ -69,7 +76,6 @@ def task_store_best_content(page_key, force=False):
 	finally:
 		page.pending = False
 		page.put()
-	map(lambda content:content.delete(), contents_found)
 
 class Page(BaseModel):
 	latest_version = int(1)
@@ -214,6 +220,7 @@ class Page(BaseModel):
 	
 	def _reset(self):
 		self.content = None
+		Content.trash(self.content_url)
 		self._raw_content = None
 		self._content_url = None
 		self._messages = []

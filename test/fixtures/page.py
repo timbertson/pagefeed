@@ -5,7 +5,9 @@ from pagefeed.models.page import Page
 from user import a_user
 from app import app
 
-def stub_page(page=None, url='http://localhost/whatever'):
+some_url = 'http://localhost/whatever'
+
+def stub_page(page=None, url=some_url):
 	if page is None:
 		page = Page(url=url, title='page title', owner=a_user)
 	page.put()

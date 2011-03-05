@@ -32,3 +32,4 @@ def extract(page):
 		raise deferred.PermanentTaskFailure("%s: %s" % (type(e), e))
 	content.put()
 	logging.info("fetched %r with viewtext extractor, got content size %s" % (url,content.size))
+	return content

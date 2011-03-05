@@ -77,7 +77,6 @@ class PageLifecycleTest(CleanDBTest):
 		worst_content = Content(url=some_url)
 
 		contents = [best_content, worst_content]
-		map(lambda x: expect(x).delete(), contents)
 
 		when(Content).for_url(p.url).then_return(contents)
 
@@ -277,25 +276,22 @@ class PageTest(CleanDBTest):
 		p = new_page()
 		self.assertTrue(p.errors)
 
-	@ignore('content extraction')
 	def test_should_retry_a_failed_download_on_update(self):
-		stub_result('', status_code=404)
-		expect(page).fetch.twice()
-
 		p = new_page()
+		p.error("failure")
+		expect(p)._reset()
+		expect(p).start_content_population()
 		p.update()
 
-	@pending('content extraction')
 	def test_should_not_retry_a_successful_download_on_update(self):
-		stub_result('')
-		mock_on(page).fetch.is_expected.once
-
 		p = new_page()
+		expect(p)._reset.never()
 		p.update()
 
-	@ignore
-	def test_should_update_date_on_fetch(self):
-		pass
+	def test_update_should_delete_existing_content(self):
+		p = new_page()
+		expect(Content).trash(p.content_url)
+		p.update(force=True)
 
 	@pending("content extraction")
 	def test_should_retry_a_successful_download_on_update_if_forced(self):
