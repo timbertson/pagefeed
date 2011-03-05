@@ -107,10 +107,9 @@ class Page(BaseModel):
 	def upgrade_0_to_1(self, keys):
 		# 0 -> 1 migration:
 		# title & content are potentially populated differently
-		keys.pop('title', None)
+		keys['_title'] = keys.pop('title', None)
 		keys.pop('content', None)
 		keys.pop('raw_content', None)
-		keys.pop('_content_url', None)
 		return [self.put, self.start_content_population]
 
 	def default_title(self):
@@ -135,6 +134,7 @@ class Page(BaseModel):
 		self.pending = True
 		self.put()
 		self.apply_transforms()
+		print "CONTENT POPULATION WOO"
 		for extractor in CONTENT_EXTRACTORS:
 			info("queuing extractor %s for page %s" % (extractor,self.key()))
 			deferred.defer(task_extract_content, extractor, self.key())

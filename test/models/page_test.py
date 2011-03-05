@@ -105,11 +105,35 @@ class PageTest(CleanDBTest):
 		self.assertEqual(pages[0].key(), complete.key())
 	
 
-	#TODO...
 	def test_should_default_to_v1_page(self):
-		pass
+		self.assertEqual(1, Page(url=some_url, owner=a_user).version)
+
 	def test_should_convert_v0_page_to_v1_page(self):
-		pass
+		#Not the best test, but provides some confidence....
+
+		#class Version1Page(db.Model):
+		#	version = db.IntegerProperty()
+		#	url = db.URLProperty(required=True)
+		#	_content_url = db.URLProperty()
+		#	content = db.TextProperty()
+		#	title = db.StringProperty()
+		#	owner = db.UserProperty(required=True)
+		#	date = db.DateTimeProperty(auto_now_add=True)
+		#	_messages = db.StringListProperty()
+
+		expect(page.deferred).defer(page.task_extract_content, any_string, any_(db.Key)).exactly(len(page.CONTENT_EXTRACTORS)).times
+		expect(page.deferred).defer(page.task_store_best_content, any_(db.Key), **any_kwargs)
+
+		p = Page(version=0, url=some_url, _content_url=some_url + "/content", content='content', title='title',
+				owner=a_user, _messages = ['info something bad happened...'])
+		self.assertTrue(p.is_saved())
+		self.assertEqual(p.version, 1)
+		self.assertEqual(p.url, some_url)
+		self.assertEqual(p.content, None)
+		self.assertEqual(p.title, "title")
+		self.assertEqual(p.owner, a_user)
+		self.assertEqual(p._messages, ['info something bad happened...'])
+		self.assertEqual(p.content_url, some_url + "/content")
 	
 	@ignore("content extraction")
 	def test_should_load_well_formed_page(self):
