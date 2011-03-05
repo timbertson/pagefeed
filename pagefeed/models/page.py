@@ -20,11 +20,11 @@ CONTENT_EXTRACTORS = ['native', 'view_text']
 
 # basic flow of a Page model:
 # step 1: add page with URL
-#  - does not show in RSS, content is None
-#  - does appear in API (android app), but with no content
+#  - does not show in RSS, content is None, pending is True
+#  - does appear in API (android app), but with has_content == false
 # step 2: if transforms are defined, perform transforms
 #  - this may require fetching the raw HTML
-#  - if this fails, an error is logged and applied_transforms is just set to True
+#  - if this step fails, an error is logged and transforms are skipped
 # step 3 to 3+n: extract content using all available content extractors
 # step 4+n: get best content from steps above, and save it as self.content
 #  - now page will appear in RSS, and content will appear in API
@@ -54,7 +54,7 @@ def task_store_best_content(page_key, force=False):
 	if not page.pending:
 		return
 	contents_found = Content.for_url(page.content_url)
-	info("content_found == %r" % (contents_found,))
+	info("contents found == %r" % (contents_found,))
 	if force is False and len(contents_found) < len(CONTENT_EXTRACTORS):
 		return
 	debug("assigning best content for page: %s" % page)
@@ -78,7 +78,7 @@ class Page(BaseModel):
 	_content_url = db.URLProperty()
 	content = db.TextProperty()
 	pending = db.BooleanProperty(default=True)
-	raw_content = db.TextProperty() # TODO: should not be stored on the page itself; it's an intermediate result
+	_raw_content = db.TextProperty() # TODO: should not be stored on the page itself; it's an intermediate result
 	_title = db.StringProperty()
 	owner = db.UserProperty(required=True)
 	date = db.DateTimeProperty(auto_now_add=True)
@@ -96,7 +96,6 @@ class Page(BaseModel):
 						post_super_calls += actions
 
 		super(type(self), self).__init__(*a, **k)
-		self.transformed = False
 		map(lambda x: x(), post_super_calls)
 	
 	def upgrade_0_to_1(self, keys):
@@ -104,6 +103,7 @@ class Page(BaseModel):
 		# title & content are potentially populated differently
 		keys.pop('title', None)
 		keys.pop('content', None)
+		keys.pop('raw_content', None)
 		keys.pop('_content_url', None)
 		return [self.put, self.start_content_population]
 
@@ -119,10 +119,11 @@ class Page(BaseModel):
 		self._title = title
 	title = property(_get_title, _set_title)
 
-	def get_raw_content(self):
-		if self.raw_content is None:
+	@property
+	def raw_content(self):
+		if self._raw_content is None:
 			self._fetch_raw_content()
-		return self.raw_content
+		return self._raw_content
 
 	def start_content_population(self):
 		self.pending = True
@@ -145,13 +146,13 @@ class Page(BaseModel):
 			if response.status_code >= 400:
 				warning("request returned status code %s\n%s" % (response.status_code, response.content))
 				raise DownloadError("request returned status code %s" % (response.status_code,))
-			self.raw_content = response.content
+			self._raw_content = response.content
 			self.put()
 		except DownloadError, e:
 			self.error(str(e))
 	
-	def replace_with_contents_from(self, new_url):
-		self._reset_content()
+	def use_content_url(self, new_url):
+		self._reset()
 		debug("replacing page %s with %s" % (self.url, new_url))
 		self.info("replacing contents from URL: %s" % (new_url,))
 		self._content_url = new_url
@@ -215,15 +216,11 @@ class Page(BaseModel):
 		assert type_ in MESSAGE_TYPES
 		self._messages.append("%s %s" % (type_, msg))
 	
-	def _reset_content(self):
+	def _reset(self):
 		self.content = None
-		self.raw_content = None
+		self._raw_content = None
 		self._content_url = None
 		self._messages = []
-	
-	def _reset(self):
-		self._reset_content()
-		self.transformed = False
 
 	def _get_messages(self):
 		return [msg.split(' ', 1) for msg in self._messages]

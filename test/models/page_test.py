@@ -1,5 +1,7 @@
 from test_helpers import *
 from pagefeed.models import page, Page, Transform, Content
+from pagefeed.lib.BeautifulSoup import BeautifulSoup
+from pagefeed.content_extraction import native
 from google.appengine.ext import deferred
 from google.appengine.ext import db
 
@@ -43,7 +45,7 @@ class PageLifecycleTest(CleanDBTest):
 	def test_reset_should_clear_all_content(self):
 		p = Page(url=some_url, owner=a_user)
 		p.content = "content!"
-		p.raw_content = "raw content!"
+		p._raw_content = "raw content!"
 		p.title = "title"
 		
 		p.update(force=True)
@@ -130,7 +132,6 @@ class PageTest(CleanDBTest):
 	def test_should_convert_v0_page_to_v1_page(self):
 		pass
 	
-	##TODO: many of these tests should be migrated to tests on the page_parser functionality
 	@ignore("content extraction")
 	def test_should_load_well_formed_page(self):
 		content = """
@@ -157,7 +158,6 @@ class PageTest(CleanDBTest):
 		expect(page).fetch(url, **any_kwargs).and_return(result)
 		
 		p = new_page(url=full_url)
-		p.get_raw_content()
 		self.assertEqual(p.url, full_url)
 		self.assertEqual(p.raw_content, 'blah')
 		self.assertFalse(p.errors)
@@ -180,7 +180,7 @@ class PageTest(CleanDBTest):
 		url =      'http://localhost/some/path/to_page.html'
 		rel_base = "http://localhost/some/path/"
 		base =     "http://localhost/"
-		mock_on(page).fetch.is_expected.with_(url).returning(result.raw)
+		mock_on(page).fetch.is_expected.with_(url).returning(result)
 		
 		p = new_page(url=url)
 		self.assertFalse(p.errors)
@@ -248,49 +248,44 @@ class PageTest(CleanDBTest):
 
 
 	@pending("content extraction")
-	def test_should_discard_html_on_completely_unparseable(self):
-		html = "<html></scr + ipt>"
-		stub_result(html)
-		p = new_page()
-		self.assertEqual(p.content, '')
-		self.assertTrue(p.errors)
-	
-	@pending("content extraction")
 	def test_should_strip_out_script_and_style_and_link_tags(self):
 		html = "<html><body><script></script><style></style><link /></body>"
 		stub_result(html)
 		p = new_page()
+		native.extract(p)
 		self.assertEqual(p.content, "<body></body>")
 		self.assertFalse(p.errors)
 	
-	@ignore
 	def test_should_apply_all_matching_transforms(self):
 		filter1 = mock('filter1')
 		filter2 = mock('filter2')
-		filters = [filter1.raw, filter2.raw]
+		filters = [filter1, filter2]
 
 		p = page.Page(owner=a_user, url='http://sub.localhost.com/some/path/to/file.html')
-		response = mock('response').with_children(status_code=200, content='initial content')
+		content = 'initial content'
+		response = mock('response').with_children(status_code=200, content=content)
 		when(page).fetch.then_return(response)
+		soup = BeautifulSoup(content)
+		soup2 = mock('second soup')
 
-		expect(Transform).find_all(user=a_user, host='sub.localhost.com').then_return(filters)
-		expect(filter1).apply(p)
-		expect(filter2).apply(p)
-		
+		expect(Transform).find_all(user=a_user, host='sub.localhost.com').and_return(filters)
+		expect(filter1).apply(p, soup).and_return(soup2)
+		expect(filter2).apply(p, soup2)
 		p.put()
+		p.apply_transforms()
 
-	@ignore
 	def test_should_fetch_content_from_new_url(self):
 		old_url = 'http://old_url'
 		new_url = 'http://new_url'
 		p = new_page(content='initial content', url=old_url)
 
 		response = mock('response').with_children(status_code=200, content='new content')
-		expect(page).fetch(new_url).and_return(response.raw)
-		p.replace_with_contents_from(new_url)
+		expect(page).fetch(new_url, **any_kwargs).and_return(response)
+		p.use_content_url(new_url)
 
 		self.assertEqual(p.url, old_url)
-		self.assertEqual(p.content, 'new content')
+		self.assertEqual(p.content_url, new_url)
+		self.assertEqual(p.raw_content, 'new content')
 	
 	@ignore("can't implement this with beautifulsoup yet...")
 	def test_should_extract_xpath_elements(self):
@@ -370,10 +365,9 @@ class PageTest(CleanDBTest):
 
 def new_page(content=None, url=some_url):
 	p = page.Page(url=url, owner=a_user)
-	if content is None:
-		p.put()
-	else:
-		p.populate_content(content)
+	if content is not None:
+		p._raw_content = content
+	p.put()
 	return p
 
 def stub_result(content, status_code=200):

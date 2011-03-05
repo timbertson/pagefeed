@@ -8,7 +8,7 @@ def extract(page):
 	content = Content(url=url, source='native')
 	logging.info("fetching %r with native extractor" % (url,))
 	try:
-		body = page.get_raw_content()
+		body = page.raw_content
 		soup = page_parser.parse(body, base_href=page.base_href, notify=logging.info)
 		content.body = page_parser.get_body(soup)
 		content.title = page_parser.get_title(soup)
@@ -16,4 +16,4 @@ def extract(page):
 		raise deferred.PermanentTaskFailure("%s: %s" % (type(e), e))
 	content.put()
 	logging.info("fetched %r with native extractor, got content size %s" % (url,content.size))
-	
+	return content
