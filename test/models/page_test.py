@@ -3,15 +3,8 @@ from pagefeed.models import page, Page, Transform, Content
 from pagefeed.lib.BeautifulSoup import BeautifulSoup
 from pagefeed.content_extraction import native
 from google.appengine.ext import deferred
-from google.appengine.ext import db
 
 some_url = 'http://localhost/dontcare'
-
-class CleanDBTest(TestCase):
-	def setUp(self):
-		super(CleanDBTest, self).setUp()
-		db.delete(Page.all())
-		db.delete(Content.all())
 
 class PageLifecycleTest(CleanDBTest):
 	def setUp(self):
@@ -102,19 +95,6 @@ class PageLifecycleTest(CleanDBTest):
 
 		page.task_store_best_content(p.key())
 
-
-class PageApiTest(CleanDBTest):
-	def test_should_list_all_pages_for_a_user_in_JSON(self):
-		pass
-
-	def test_should_list_pending_pages(self):
-		pass
-
-	def test_should_fetch_a_single_page(self):
-		pass
-
-	def test_should_fail_for_a_page_without_content(self):
-		pass
 
 class PageTest(CleanDBTest):
 	def test_find_complete_should_skip_incomplete_pages(self):

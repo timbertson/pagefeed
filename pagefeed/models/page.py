@@ -184,10 +184,6 @@ class Page(BaseModel):
 		return filter(lambda p:p.content is not None, cls.find_all(owner))
 	
 	@classmethod
-	def find_since(cls, owner, date):
-		return db.Query(cls).filter('owner =', owner).filter('date >=', date).order('date')
-	
-	@classmethod
 	def find(cls, owner, url):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
 

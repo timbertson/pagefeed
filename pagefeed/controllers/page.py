@@ -1,9 +1,12 @@
 import cgi
+import operator
 from django.utils import simplejson as json
 from datetime import datetime
 
 from base import *
 from pagefeed.models import Page
+
+to_json = operator.methodcaller('json_attrs')
 
 class PageHandler(BaseHandler):
 	def _add(self, user, url, success = None, force=False):
@@ -30,7 +33,7 @@ class PageHandler(BaseHandler):
 		self.response.out.write(render_page('error', {'page':page, 'title':'error'}, partial=self.is_ajax()))
 
 	def post(self):
-		page = self._add(self.user(), self.url(), success = self._render_success)
+		self._add(self.user(), self.url(), success = self._render_success)
 
 	def delete(self):
 		page = Page.find(owner=self.user(), url=self.url())
@@ -47,20 +50,19 @@ class PageHandler(BaseHandler):
 			if page is not None:
 				self.response.out.write(render("snippets/page_summary.html", {'page':page}))
 		elif self.is_json():
-			self._page_json(page)
+			json.dump([to_json(page)], self.response.out)
 		elif self.quiet_mode():
 			return
 		else:
 			self.redirect('/')
 	
-	def _page_json(self, page):
-		page_info = [p.json_attrs() for p in (page,) if p is not None]
-		json.dump(page_info, self.response.out)
-	
 	def get(self):
 		page = Page.find(owner=self.user(), url=self.url())
-		if page is None:
-			raise HttpError(404, "could not find saved page: %s" % (cgi.escape(self.url(),)))
+		if page is None or page.content is None:
+			print "RAISER"
+			exe = HttpError(404, "could not find content for page: %s" % (cgi.escape(self.url(),)))
+			print repr(exe)
+			raise HttpError(404, "could not find content for page: %s" % (cgi.escape(self.url(),)))
 		self.response.out.write(page.content)
 
 class PageBookmarkletHandler(PageHandler):
@@ -76,13 +78,10 @@ class PageDeleteHandler(PageHandler):
 
 class PageUpdateHandler(PageHandler):
 	def post(self):
-		page = self._add(self.user(), self.url(), success = self._render_success, force=True)
+		self._add(self.user(), self.url(), success = self._render_success, force=True)
 
 class PageListHandler(BaseHandler):
 	def get(self):
-		since = int(self.request.get('since', 0))
-		since_time = datetime.fromtimestamp(since)
-		pages = Page.find_since(self.user(), since_time)
-		page_info = [page.json_attrs() for page in pages]
-		json.dump(page_info, self.response.out)
+		pages = Page.find_all(self.user())
+		json.dump(map(to_json, pages), self.response.out)
 

@@ -14,4 +14,12 @@ from fixtures import *
 from pagefeed.lib.BeautifulSoup import BeautifulSoup
 
 from google.appengine.api import users
+from google.appengine.ext import db
+
+class CleanDBTest(TestCase):
+	def setUp(self):
+		from pagefeed.models import Page, Content
+		super(CleanDBTest, self).setUp()
+		db.delete(Page.all())
+		db.delete(Content.all())
 
