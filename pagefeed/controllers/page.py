@@ -59,9 +59,6 @@ class PageHandler(BaseHandler):
 	def get(self):
 		page = Page.find(owner=self.user(), url=self.url())
 		if page is None or page.content is None:
-			print "RAISER"
-			exe = HttpError(404, "could not find content for page: %s" % (cgi.escape(self.url(),)))
-			print repr(exe)
 			raise HttpError(404, "could not find content for page: %s" % (cgi.escape(self.url(),)))
 		self.response.out.write(page.content)
 

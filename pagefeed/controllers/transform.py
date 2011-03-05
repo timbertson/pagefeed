@@ -34,7 +34,6 @@ class TransformHandler(BaseHandler):
 		transform_params = self._get_transform_params()
 		if self.key() is not None:
 			xform = db.get(self.key())
-			info(type(xform))
 			assert isinstance(xform, Transform)
 			[setattr(xform, k, v) for k,v in transform_params.items()]
 		else:

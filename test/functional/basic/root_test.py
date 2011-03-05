@@ -6,9 +6,6 @@ from pagefeed.models import Page, UserID
 from test_helpers import *
 
 class RootTest(TestCase):
-	def setUp(self):
-		self.page = PageDriver()
-	
 	def test_should_show_page_list_for_a_logged_in_user(self):
 		page = fixtures.stub_page()
 		response = fixtures.app().get('/')
