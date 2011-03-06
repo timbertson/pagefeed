@@ -21,3 +21,4 @@ handlers:
 builtins:
 - deferred: on
 - datastore_admin: on
+- remote_api: on
