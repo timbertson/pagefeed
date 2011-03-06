@@ -1,4 +1,4 @@
-from pagefeed.controllers import migrate
+from pagefeed.controllers.admin import migrate
 from google.appengine.ext import db
 from StringIO import StringIO
 import operator

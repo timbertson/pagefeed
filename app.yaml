@@ -12,6 +12,9 @@ handlers:
 - url: /feed/.*
   secure: always
   script: main.py
+- url: /admin/.*
+  script: admin.py
+  login: admin
 - url: .*
   script: main.py
   

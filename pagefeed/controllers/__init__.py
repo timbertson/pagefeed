@@ -5,4 +5,3 @@ from transform import *
 from user import *
 from about import *
 from recipe import *
-from migrate import MigrateHandler
