@@ -13,7 +13,7 @@ def add_gae_paths():
 	add_load_path(libs + 'yaml/lib/')
 	map(add_load_path, paths)
 
-def init_gae():
+def init_gae(**opts):
 	from google.appengine.dist import use_library
 	use_library('django', '0.96')
 	from google.appengine.tools import dev_appserver
@@ -28,6 +28,7 @@ def init_gae():
 		'nosegae.datastore')
 	gae_opts[ARG_HISTORY_PATH] = os.path.join(tempfile.gettempdir(),
 		'gae.datastore.history')
+	gae_opts.update(opts)
 	config, _junk = dev_appserver.LoadAppConfig(os.curdir, {})
 	dev_appserver.SetupStubs(config.application, **gae_opts)
 

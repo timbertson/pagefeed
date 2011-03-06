@@ -7,5 +7,5 @@ class HttpError(Exception):
 class RedirectError(Exception):
 	def __init__(self, target):
 		self.target = target
-		super(HttpError, self).__init__(target)
+		super(RedirectError, self).__init__(target)
 

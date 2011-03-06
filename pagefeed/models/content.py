@@ -54,8 +54,8 @@ class Content(BaseModel):
 	def purge(cls):
 		one_day_ago = datetime.utcnow() - timedelta(days=1)
 		q = db.Query(cls, keys_only=True).filter('lastmod <', one_day_ago)
-		for batch in iter(lambda: q.fetch(500), []):
-			db.delete(batch)
+		for item in q:
+			db.delete(item)
 
 
 

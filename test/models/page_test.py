@@ -65,11 +65,11 @@ class PageLifecycleTest(CleanDBTest):
 
 		page.task_store_best_content(p.key(), force=True)
 		p = Page.get(p.key())
-		self.assertEquals(p._title, '[localhost saved item]')
-		self.assertEquals(p.content, '')
+		self.assertEquals(p.title, '[localhost saved item]')
+		self.assertEquals(p.content, None)
 
 	def test_store_best_content_should_do_so_if_all_extractors_are_complete(self):
-		p = Page(url=some_url, owner=a_user)
+		p = Page(url=some_url, owner=a_user, pending=True)
 		p.put()
 		modify(page).content_extractors = [1,2]
 
@@ -109,8 +109,7 @@ class PageTest(CleanDBTest):
 		self.assertEqual(1, Page(url=some_url, owner=a_user).version)
 
 	def test_should_convert_v0_page_to_v1_page(self):
-		#Not the best test, but provides some confidence....
-
+		# for reference, the v0 properties are:
 		#class Version1Page(db.Model):
 		#	version = db.IntegerProperty()
 		#	url = db.URLProperty(required=True)
@@ -121,15 +120,15 @@ class PageTest(CleanDBTest):
 		#	date = db.DateTimeProperty(auto_now_add=True)
 		#	_messages = db.StringListProperty()
 
-		expect(page.deferred).defer(page.task_extract_content, any_string, any_(db.Key)).exactly(len(page.CONTENT_EXTRACTORS)).times
-		expect(page.deferred).defer(page.task_store_best_content, any_(db.Key), **any_kwargs)
+		expect(page.deferred).defer.never()
 
 		p = Page(version=0, url=some_url, _content_url=some_url + "/content", content='content', title='title',
 				owner=a_user, _messages = ['info something bad happened...'])
-		self.assertTrue(p.is_saved())
+		p.put()
+		p = Page.get(p.key())
 		self.assertEqual(p.version, 1)
 		self.assertEqual(p.url, some_url)
-		self.assertEqual(p.content, None)
+		self.assertEqual(p.content, 'content')
 		self.assertEqual(p.title, "title")
 		self.assertEqual(p.owner, a_user)
 		self.assertEqual(p._messages, ['info something bad happened...'])
@@ -320,10 +319,11 @@ class PageTest(CleanDBTest):
 	@pending("content extraction")
 	def test_should_retry_a_successful_download_on_update_if_forced(self):
 		stub_result('')
-		mock_on(page).fetch.is_expected.twice
+		mock_on(page).task_extract_content.is_expected.twice
 
 		p = new_page()
 		p.update(force=True)
+		self.assertTrue(p.pending)
 
 	@ignore
 	def test_should_render_as_html(self):

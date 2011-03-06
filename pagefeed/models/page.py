@@ -58,7 +58,8 @@ def contents_already_extracted_for(page):
 
 def task_store_best_content(page_key, force=False):
 	page = Page.get(page_key)
-	if not page.pending:
+	if page.content or not page.pending:
+		info("skipping best content persistence for page %s" % (page,))
 		return
 	complete, contents_found = contents_already_extracted_for(page)
 	info("contents found == %r" % (contents_found,))
@@ -83,7 +84,7 @@ class Page(BaseModel):
 	url = db.URLProperty(required=True)
 	_content_url = db.URLProperty()
 	content = db.TextProperty()
-	pending = db.BooleanProperty(default=True)
+	pending = db.BooleanProperty(default=False)
 	_raw_content = db.TextProperty() # TODO: should not be stored on the page itself; it's an intermediate result
 	_title = db.StringProperty()
 	owner = db.UserProperty(required=True)
@@ -91,26 +92,19 @@ class Page(BaseModel):
 	_messages = db.StringListProperty()
 
 	def __init__(self, *a, **k):
-		post_super_calls = []
 		if 'version' in k:
 			if k['version'] < self.latest_version:
 				for x in range(k['version'], self.latest_version):
 					info("upgrading model from version %s to %s" % (x, x+1))
-					actions = getattr(self, "upgrade_%s_to_%s" % (x, x+1))(k)
+					getattr(self, "upgrade_%s_to_%s" % (x, x+1))(k)
 					k['version'] = x+1
-					if actions:
-						post_super_calls += actions
 
 		super(type(self), self).__init__(*a, **k)
-		map(lambda x: x(), post_super_calls)
 	
 	def upgrade_0_to_1(self, keys):
 		# 0 -> 1 migration:
-		# title & content are potentially populated differently
 		keys['_title'] = keys.pop('title', None)
-		keys.pop('content', None)
-		keys.pop('raw_content', None)
-		return [self.put, self.start_content_population]
+		keys['_raw_content'] = keys.pop('raw_content', None)
 
 	def default_title(self):
 		try:
@@ -133,6 +127,7 @@ class Page(BaseModel):
 	def start_content_population(self):
 		self.pending = True
 		self.put()
+		print repr(self.to_xml())
 		self.apply_transforms()
 		print "CONTENT POPULATION WOO"
 		for extractor in CONTENT_EXTRACTORS:
