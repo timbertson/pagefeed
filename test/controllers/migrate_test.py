@@ -40,7 +40,7 @@ class TestMigrateHandler(TestCase):
 		old_models = [TestMigrationModel.get(model.key()) for model in old_models]
 		current_model = TestMigrationModel.get(current_model.key())
 		
-		get_key = operator.methodcaller('key')
+		get_key = lambda x: x.key()
 
 		expect(db).put.where(lambda obj: obj.key() in map(get_key, old_models)).twice()
 		expect(db).put.where(lambda obj: obj.key() == current_model.key()).never()

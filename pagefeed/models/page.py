@@ -127,9 +127,7 @@ class Page(BaseModel):
 	def start_content_population(self):
 		self.pending = True
 		self.put()
-		print repr(self.to_xml())
 		self.apply_transforms()
-		print "CONTENT POPULATION WOO"
 		for extractor in CONTENT_EXTRACTORS:
 			info("queuing extractor %s for page %s" % (extractor,self.key()))
 			deferred.defer(task_extract_content, extractor, self.key())

@@ -6,7 +6,7 @@ from datetime import datetime
 from base import *
 from pagefeed.models import Page
 
-to_json = operator.methodcaller('json_attrs')
+to_json = lambda x: x.json_attrs()
 
 class PageHandler(BaseHandler):
 	def _add(self, user, url, success = None, force=False):
@@ -14,7 +14,7 @@ class PageHandler(BaseHandler):
 		page = Page.find(user, url)
 		if page is None:
 			page = Page(owner=self.user(), url=url)
-			page.put()
+			page.start_content_population()
 			new_page = page
 		else:
 			page.update(force=force)

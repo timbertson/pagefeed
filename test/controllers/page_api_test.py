@@ -42,3 +42,17 @@ class PageApiTest(TestCase):
 		expect(Page).find(owner=a_user, url="url").and_return(page)
 		self.assertRaises(HttpError, handler.get, args=(404, 'could not find content for page: url'))
 
+	@ignore("todo...")
+	def test_add_should_start_content_population(self):
+		handler = self.handler(PageHandler)
+		when(handler).url.then_return(some_url)
+		when(handler).user.then_return(a_user)
+
+		when(Page).find(a_user, some_url).then_return(None)
+		page = mock('page')
+		when(Page).__call__.then_raise("unexpected page instantiation")
+		when(Page)(owner=a_user, url=some_url).then_return(page)
+		expect(handler)._render_success(page)
+		expect(page).start_content_population()
+
+		handler.post()
