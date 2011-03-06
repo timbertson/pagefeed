@@ -56,3 +56,88 @@ class NativeContentExtraction(TestCase):
 		self.assertEqual(content.title, 'Title of Content')
 		self.assertEqual("".join(content.body.split('\n')), '<body><p>Hello there!</p></body>')
 
+class NativeContentExtractionParsing(CleanDBTest):
+	def extract(self, content, url=some_url):
+		p = Page(url=url, _raw_content=content, owner=a_user)
+		return native.extract(p)
+
+	def test_should_load_well_formed_page(self):
+		content = """
+			<html>
+			<title>the title!</title>
+			<body>the body!</body>
+			</html>
+			"""
+		content = self.extract(content)
+		self.assertEqual(content.title, 'the title!')
+		self.assertEqual(content.body, '<body>the body!</body>')
+
+	def assertContains(self, needle, haystack):
+		self.assertTrue(needle in haystack, "could not find %s in %s" % (needle, haystack))
+
+	def test_should_absoluteize_links_and_images(self):
+		content = """
+			<html>
+			<title>the title!</title>
+			<body>
+				<a href="rel.html">rel</a>
+				<a href="/path/to/pathed.html">pathed</a>
+				<a href="http://google.com/abs.html">abs</a>
+				<img src="/path/to/path2.jpg" />
+			</body>
+			</html>
+			"""
+		url =      'http://localhost/some/path/to_page.html'
+		rel_base = "http://localhost/some/path/"
+		base =     "http://localhost/"
+		
+		content = self.extract(content, url=url)
+		self.assertContains('<a href="%srel.html">' % rel_base        , content.body)
+		self.assertContains('<a href="%spath/to/pathed.html">' % base , content.body)
+		self.assertContains('<a href="http://google.com/abs.html">'   , content.body)
+		self.assertContains('<img src="%spath/to/path2.jpg" />' % base, content.body)
+
+	def test_should_remove_a_bunch_of_unwanted_html_attributes(self):
+		html = """
+				<html>
+					<p style="border-color:#ff; background:#fff;" COLOR="foo" alt="lala">
+						<img src="http://localhost/blah" width  =  100 height=  20px />
+						<div bgcolor=foo>
+							so then style=none should not be stripped
+							<span bgcolor-andthensome="not_strippped"></span>
+						</div>
+					</p>
+				</html>
+			"""
+		expected_html = """
+				<html>
+					<p alt="lala">
+						<img src="http://localhost/blah" />
+						<div>
+							so then style=none should not be stripped
+							<span bgcolor-andthensome="not_strippped"></span>
+						</div>
+					</p>
+				</html>
+			"""
+		content = self.extract(html)
+		print "ACTUAL: " + content.body
+		print '-----'
+		print "EXPECTED: " + expected_html
+		self.assertEqual(content.body.strip().replace('\t',''), expected_html.strip().replace('\t',''))
+
+	def test_should_fall_back_to_entire_html_if_it_has_no_body(self):
+		html = "<html><title>no body</title></html>"
+		content = self.extract(html)
+		self.assertEqual(content.title, 'no body')
+		self.assertEqual(content.body, html)
+
+	def test_should_strip_out_script_and_style_and_link_tags(self):
+		html = "<html><body><script></script><style></style><link /></body>"
+		content = self.extract(html)
+		self.assertEqual(content.body, "<body></body>")
+	
+	def test_should_accept_multiline_titles(self):
+		html = "<title>foo\nbar</title>"
+		self.assertEqual(self.extract(html).title, "foo bar")
+

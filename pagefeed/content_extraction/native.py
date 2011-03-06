@@ -17,3 +17,4 @@ def extract(page):
 	content.put()
 	logging.info("fetched %r with native extractor, got content size %s" % (url,content.size))
 	return content
+
