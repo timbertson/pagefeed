@@ -9,7 +9,9 @@
 	</form>
 	<form action="/page/update/" method="POST" class="update ajax unary" id="update_page_{{page.key|escape}}">
 		<input type="hidden" name="url" value="{{page.url|escape}}" />
-		<input type="submit" value="R" />
+		{% if not page.pending %}
+			<input type="submit" value="R" />
+		{% endif %}
 
 		<!-- ajax properties -->
 		<input type="hidden" name="dest" value="li" />
@@ -17,7 +19,12 @@
 	</form>
 	<h3><a href="{{page.url|escape}}">{{page.title}}</a></h3>
 	<div class="description toggleContainer">
-		<div class="url">{{page.url|escape}}</div>
+		<div class="url">
+			{% if page.pending %}
+				<em class="pending">fetching:</em>
+			{% endif %}
+			{{page.url|escape}}
+		</div>
 		{{ page.message_html }}
 	</div>
 </li>

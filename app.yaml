@@ -12,8 +12,13 @@ handlers:
 - url: /feed/.*
   secure: always
   script: main.py
+- url: /admin/.*
+  script: admin.py
+  login: admin
 - url: .*
   script: main.py
   
 builtins:
+- deferred: on
+- datastore_admin: on
 - remote_api: on

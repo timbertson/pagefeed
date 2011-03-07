@@ -1,5 +1,5 @@
 from test_helpers import *
-from models import user
+from pagefeed.models import user
 
 #TODO
 

@@ -1,0 +1,4 @@
+cron:
+- description: clean content older than 1 day
+  url: /admin/cron/content
+  schedule: every 12 hours

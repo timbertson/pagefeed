@@ -1,19 +1,16 @@
 import urllib2
 from google.appengine.api import users
 
-from models import Page, UserID
+from pagefeed.models import Page, UserID
 
 from test_helpers import *
 
 class RootTest(TestCase):
-	def setUp(self):
-		self.page = PageDriver()
-	
 	def test_should_show_page_list_for_a_logged_in_user(self):
 		page = fixtures.stub_page()
 		response = fixtures.app().get('/')
 		
-		response.mustcontain('Welcome to PageFeed, foo')
+		response.mustcontain('Welcome to PageFeed')
 		response.mustcontain(page.title)
 	
 	def test_should_link_to_feed_for_a_logged_in_user(self):
@@ -26,8 +23,7 @@ class RootTest(TestCase):
 		email = user.email()
 		user_handle = UserID.get(email).handle
 		
-		feed_link = '/feed/%s-%s/' % (user_handle, urllib2.quote(email))
-		content = response.body
+		feed_link = 'https://localhost/feed/%s-%s/' % (user_handle, urllib2.quote(email))
 		response.mustcontain('<link href="%s" type="application/rss+xml"' % (feed_link))
 		response.mustcontain('<a href="%s"' % feed_link)
 	
@@ -41,8 +37,8 @@ class RootTest(TestCase):
 			self.assertEqual(url, page.url)
 			return page
 			
-		mock_on(Page).find.with_action(check)
-		mock_on(page).delete.is_expected
+		expect(Page).find.and_call(check)
+		expect(page).delete()
 
 		response = delete_form.submit().follow()
 		self.assertEqual(response.request.url, 'http://localhost/')
@@ -57,8 +53,8 @@ class RootTest(TestCase):
 			self.assertEqual(url, page.url)
 			return page
 			
-		mock_on(Page).find.with_action(check)
-		mock_on(page).update.is_expected.with_(force=True)
+		expect(Page).find.and_call(check)
+		expect(page).update(force=True)
 		
 		response = update_form.submit().follow()
 		self.assertEqual(response.request.url, 'http://localhost/')

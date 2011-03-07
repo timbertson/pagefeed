@@ -1,5 +1,5 @@
 from test_helpers import *
-from models import transform, Transform
+from pagefeed.models import transform, Transform
 
 class TransformAddTest(TestCase):
 	path = "/transform/"
@@ -49,7 +49,7 @@ class TransformAddTest(TestCase):
 		create_params = kw.copy()
 		create_params['owner'] = fixtures.a_user
 		
-		mock_on(transform.Transform).create.is_expected.with_('follow', **create_params).returning(xform.raw)
+		when(transform.Transform).create('follow', **create_params).then_return(xform)
 		response = self.add(**kw)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 
@@ -59,7 +59,6 @@ class TransformAddTest(TestCase):
 		response = form.submit(status=400)
 		response.mustcontain("Error:")
 
-	@ignore("import path issues")
 	def test_should_delete_a_transform_and_redirect_to_index(self):
 		response = self.add(**self.default_opts).follow()
 		self.assertEqual(len(self.all_transforms()), 1)
@@ -69,7 +68,6 @@ class TransformAddTest(TestCase):
 		self.assertEqual(len(self.all_transforms()), 0)
 		self.assertEqual(response.follow().request.url, fixtures.app_root + 'transform/')
 
-	@ignore("broken because of import path messups in GAE")
 	def test_should_update_an_existing_transform(self):
 		page = self.add(**self.default_opts).follow()
 		edit_form = self.first_form('edit', page)

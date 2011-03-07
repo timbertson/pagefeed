@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type='text/xsl' href='interface.xsl'?>
+<interface xmlns="http://zero-install.sourceforge.net/2004/injector/interface" uri="http://gfxmonk.net/dist/0install/pagefeed-appengine.xml">
+	<name>pagefeed-appengine</name>
+	<summary>pagefeed-appengine</summary>
+	<description>
+	pagefeed-appengine
+	</description>
+	<group>
+		<requires interface="http://gfxmonk.net/dist/0install/google-app-engine.xml"/>
+		<command name="run">
+			<runner interface="http://gfxmonk.net/dist/0install/google-app-engine.xml"/>
+			<arg>dev_appserver.py</arg>
+		</command>
+		<command name="test">
+			<requires interface="http://gfxmonk.net/dist/0install/rednose.xml"/>
+			<requires interface="http://gfxmonk.net/dist/0install/mocktest.xml"/>
+			<requires interface="http://gfxmonk.net/dist/0install/nosegae.xml"/>
+			<requires interface="http://gfxmonk.net/dist/0install/python-webtest.xml"/>
+			<runner interface="http://gfxmonk.net/dist/0install/nosetests-plugin-resolver.xml"/>
+		</command>
+		<environment name="PYTHONPATH" insert="" mode="prepend"/>
+		<implementation id="." version="0.0.1">
+		</implementation>
+	</group>
+</interface>

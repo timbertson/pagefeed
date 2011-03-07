@@ -114,9 +114,14 @@ form.unary {
 }
 
 .url {
-/*	clear:left;*/
 	white-space:nowrap;
 	overflow:hidden;
+}
+.url .pending {
+	font-size:0.8em;
+	color:#8a8;
+	padding-right:0.5em;
+	font-style:normal;
 }
 
 #links .description {

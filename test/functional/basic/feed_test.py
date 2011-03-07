@@ -1,8 +1,8 @@
 import cgi
 from test_helpers import *
 
-from models.page import Page
-from models.user import UserID
+from pagefeed.models.page import Page
+from pagefeed.models.user import UserID
 
 class FeedTest(TestCase):
 	def get_feed(self, email, secret, **kwargs):
@@ -11,18 +11,18 @@ class FeedTest(TestCase):
 		print repr(fixtures)
 		return fixtures.app().get('/feed/%s-%s/' % (secret, email), **kwargs)
 		
-	def test_should_display_feeds_for_a_user(self):
+	def test_should_display_complete_feeds_for_a_user(self):
 		email = fixtures.a_user.email()
 		userid = UserID.get(email)
 		page = fixtures.stub_page()
 		page.title = 'the title!'
-		mock_on(Page).find_all.is_expected.with_(fixtures.a_user)
+		expect(Page).find_complete(fixtures.a_user).and_return([page])
 		response = self.get_feed(email, userid.handle)
+		print repr(response.body)
 		response.mustcontain('the title!')
 
 	def test_should_not_display_feeds_for_an_illegitimate_user(self):
 		email = fixtures.a_user.email()
-		userid = UserID.get(email)
-		mock_on(Page).find_all.is_not_expected
+		expect(Page).find_all.never()
 		self.get_feed(email, '123', status=403)
-
+	

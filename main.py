@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+
+from google.appengine.dist import use_library
+use_library('django', '0.96')
+
+from pagefeed.controllers import *
+
 import logging
 import wsgiref.handlers
 from google.appengine.ext import webapp
 from google.appengine.api import users
-from migrate import MigrateHandler
-
-from controllers import *
 
 application = webapp.WSGIApplication([
 		('/', MainHandler),
@@ -22,7 +27,6 @@ application = webapp.WSGIApplication([
 		('/faq/?', FaqHandler),
 		('/transform/del/', TransformDeleteHandler),
 		(r'/feed/(\d+)-([^/]+)/', FeedHandler),
-		(r'/migrate/(?:([^/]+)/?)?', MigrateHandler),
 		], debug=True)
 
 def main():

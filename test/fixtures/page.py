@@ -1,12 +1,13 @@
 
 from mocktest import *
 
-from models.page import Page
+from pagefeed.models.page import Page
 from user import a_user
 from app import app
 
-def stub_page(page=None, url='http://localhost/whatever'):
-	mock_on(Page).fetch
+some_url = 'http://localhost/whatever'
+
+def stub_page(page=None, url=some_url):
 	if page is None:
 		page = Page(url=url, title='page title', owner=a_user)
 	page.put()
@@ -14,7 +15,7 @@ def stub_page(page=None, url='http://localhost/whatever'):
 	all_pages = mock('all pages')
 	all_pages.with_methods(count=1, fetch=[page])
 	
-	mock_on(Page).find_all.returning(all_pages.raw)
+	when(Page).find_all.then_return(all_pages)
 	return page
 
 
