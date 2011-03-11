@@ -14,7 +14,8 @@ def extract(page):
 		content.title = page_parser.get_title(soup)
 	except StandardError, e:
 		raise deferred.PermanentTaskFailure("%s: %s" % (type(e), e))
-	content.put()
+	finally:
+		content.put()
 	logging.info("fetched %r with native extractor, got content size %s" % (url,content.size))
 	return content
 

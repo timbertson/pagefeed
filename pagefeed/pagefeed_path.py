@@ -6,3 +6,6 @@ def add_load_path(p):
 		sys.path.append(p)
 
 add_load_path(os.path.abspath(os.path.dirname(__file__)))
+
+from google.appengine.dist import use_library
+use_library('django', '0.96')

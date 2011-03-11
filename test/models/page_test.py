@@ -1,6 +1,6 @@
 from test_helpers import *
 from pagefeed.models import page, Page, Transform, Content
-from pagefeed.lib.BeautifulSoup import BeautifulSoup
+from pagefeed.lib.BeautifulSoup import BeautifulSoup, UnicodeDammit
 from pagefeed.content_extraction import native
 from google.appengine.ext import deferred
 
@@ -180,6 +180,7 @@ class PageTest(CleanDBTest):
 		expect(filter2).apply(p, soup2)
 		p.put()
 		p.apply_transforms()
+
 	def test_should_fetch_content_from_new_url(self):
 		old_url = 'http://old_url'
 		new_url = 'http://new_url'
@@ -193,6 +194,34 @@ class PageTest(CleanDBTest):
 		self.assertEqual(p.content_url, new_url)
 		self.assertEqual(p.raw_content, 'new content')
 	
+	def test_should_detect_encoding_and_store_unicode_content(self):
+		p = new_page(url=some_url)
+
+		content_unicode = u'caf\xe9'
+		response = mock('response').with_children(status_code=200,
+			content=content_unicode.encode('UTF-8'),
+			headers={'Content-Type':'text/html'})
+		expect(page).fetch(some_url, **any_kwargs).and_return(response)
+
+		self.assertEqual(p.raw_content, content_unicode)
+		self.assertTrue(isinstance(p.raw_content, unicode))
+	
+	def test_should_use_encoding_from_http_headers(self):
+		# known content that beautifulsoup will detect as windows-1521
+		content = '\t\t\t"Kuzey r\xfczgari" (2007) {(#1.2)}  [Kaz\xc4\xb1m]\n'
+		expected_unicode = content.decode('ISO-8859-2')
+
+		p = new_page(url=some_url)
+
+		response = mock('response').with_children(status_code=200,
+			content=content,
+			headers={'Content-Type':'text/html; ISO-8859-2'})
+		expect(page).fetch(some_url, **any_kwargs).and_return(response)
+
+		self.assertEqual(p.raw_content, expected_unicode)
+		self.assertNotEqual(UnicodeDammit(content).unicode, expected_unicode)
+		self.assertTrue(isinstance(p.raw_content, unicode))
+
 	@ignore("can't implement this with beautifulsoup yet...")
 	def test_transforms_should_extract_xpath_elements(self):
 		pass

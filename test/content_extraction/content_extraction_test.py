@@ -3,6 +3,7 @@ from pagefeed.models import Page, Content
 from pagefeed.models import page as page_module
 from pagefeed.content_extraction import view_text, native
 from google.appengine.api.urlfetch import fetch, DownloadError
+from google.appengine.ext import deferred
 from datetime import datetime, timedelta
 
 def put(*objs):
@@ -140,4 +141,18 @@ class NativeContentExtractionParsing(CleanDBTest):
 	def test_should_accept_multiline_titles(self):
 		html = "<title>foo\nbar</title>"
 		self.assertEqual(self.extract(html).title, "foo bar")
+
+	def test_should_save_blank_contents_if_it_cannot_parse_html(self):
+		html = '<title><scr " + ipt> + "foo\nbar</title><body>fjdklfsj</body>'
+		def all_contents():
+			return Content.all().fetch(5)
+		self.assertEquals(len(all_contents()), 0)
+		try:
+			self.extract(html, url=some_url)
+			self.fail()
+		except deferred.PermanentTaskFailure:
+			self.assertEquals(len(all_contents()), 1)
+			content = all_contents()[0]
+			self.assertEqual(content.title, None)
+			self.assertEqual(content.body, None)
 

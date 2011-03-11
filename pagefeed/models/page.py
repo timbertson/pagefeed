@@ -6,6 +6,7 @@ from pagefeed.view_helpers import render
 from pagefeed.lib.url_helpers import host_for_url
 import time
 from pagefeed.lib.Python26HTMLParser import HTMLParser
+from pagefeed.lib.BeautifulSoup import UnicodeDammit
 
 from logging import debug, info, warning, error
 from transform import Transform, TransformError
@@ -59,11 +60,12 @@ def contents_already_extracted_for(page):
 def task_store_best_content(page_key, force=False):
 	page = Page.get(page_key)
 	if page.content or not page.pending:
-		info("skipping best content persistence for page %s" % (page,))
+		debug("skipping best content persistence for page %s" % (page,))
 		return
 	complete, contents_found = contents_already_extracted_for(page)
 	info("contents found == %r" % (contents_found,))
 	if force is False and not complete:
+		debug("not forcing extraction...")
 		return
 	debug("assigning best content for page: %s" % page)
 	try:
@@ -131,7 +133,7 @@ class Page(BaseModel):
 		for extractor in CONTENT_EXTRACTORS:
 			info("queuing extractor %s for page %s" % (extractor,self.key()))
 			deferred.defer(task_extract_content, extractor, self.key())
-			deferred.defer(task_store_best_content, self.key(), force=True, _countdown = 60 * 10)
+			deferred.defer(task_store_best_content, self.key(), force=True, _countdown = 60 * 5)
 
 	def apply_transforms(self):
 		try:
@@ -145,7 +147,13 @@ class Page(BaseModel):
 			if response.status_code >= 400:
 				warning("request returned status code %s\n%s" % (response.status_code, response.content))
 				raise DownloadError("request returned status code %s" % (response.status_code,))
-			self._raw_content = response.content
+			content = response.content
+			encoding_hint = []
+			try:
+				encoding_hint = [response.headers['Content-Type'].split(';')[1].strip()]
+			except (KeyError, IndexError, TypeError): pass
+			content = UnicodeDammit(content, overrideEncodings=encoding_hint)
+			self._raw_content = content.unicode
 			self.put()
 		except DownloadError, e:
 			self.error(str(e))

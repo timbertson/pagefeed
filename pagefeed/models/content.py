@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 class Content(BaseModel):
 	latest_version = 0
 	version = db.IntegerProperty(default=latest_version)
-	min_size = 1000 # characters
+	min_size = 2048 # characters
 	url = db.URLProperty(required=True)
 	title = db.StringProperty()
 	body = db.TextProperty()
