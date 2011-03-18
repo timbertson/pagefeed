@@ -3,9 +3,11 @@ from pagefeed.models import Content
 import logging
 from google.appengine.ext import deferred
 
+NATIVE = 'native'
+
 def extract(page):
 	url = page.content_url
-	content = Content(url=url, source='native')
+	content = Content(url=url, source=NATIVE)
 	logging.info("fetching %r with native extractor" % (url,))
 	body = page.raw_content
 	try:

@@ -3,6 +3,7 @@ from base import BaseModel
 from google.appengine.ext import db
 from datetime import datetime, timedelta
 
+
 class Content(BaseModel):
 	latest_version = 0
 	version = db.IntegerProperty(default=latest_version)
@@ -18,10 +19,23 @@ class Content(BaseModel):
 			self.source, self.url, self.title, self.get_size(), self.lastmod)
 
 	def __cmp__(self, other):
+		from pagefeed.content_extraction import VIEWTEXT
 		both = (self, other)
+		self_is_better = 1
+		other_is_better = -1
+
+		# viewtext is so awesome that we always prefer it as long
+		# as it exceeds the minimum size
+		viewtext_preference = 0
+		if self.source != other.source:
+			for item, result in [(self, self_is_better), (other, other_is_better)]:
+				if item.source == VIEWTEXT and not Content.too_small(item):
+					return result
+
+		# otherwise, resort to best size:
 		sizes = map(Content.get_size, both)
 		if operator.eq(*sizes):
-			return 0
+			return viewtext_preference
 		if any(map(Content.too_small, both)):
 			# bigger is better when either is too small
 			return cmp(*sizes)

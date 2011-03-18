@@ -19,6 +19,14 @@
 			<requires interface="http://gfxmonk.net/dist/0install/python-webtest.xml"/>
 			<runner interface="http://gfxmonk.net/dist/0install/nosetests-plugin-resolver.xml"/>
 		</command>
+		<command name="autonose">
+			<requires interface="http://gfxmonk.net/dist/0install/rednose.xml"/>
+			<requires interface="http://gfxmonk.net/dist/0install/mocktest.xml"/>
+			<requires interface="http://gfxmonk.net/dist/0install/nosegae.xml"/>
+			<requires interface="http://gfxmonk.net/dist/0install/python-webtest.xml"/>
+			<requires interface="http://gfxmonk.net/dist/0install/nosetests-plugin-resolver.xml"/>
+			<runner interface="http://gfxmonk.net/dist/0install/autonose.xml"/>
+		</command>
 		<environment name="PYTHONPATH" insert="" mode="prepend"/>
 		<implementation id="." version="0.0.1">
 		</implementation>

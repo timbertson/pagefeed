@@ -4,11 +4,12 @@ from django.utils import simplejson as json
 import urllib
 from google.appengine.ext import deferred
 from pagefeed.models import Content
-from pagefeed.lib import page_parser
+
+VIEWTEXT = 'viewtext'
 
 def extract(page):
 	url = page.content_url
-	content = Content(url=url, source='viewtext')
+	content = Content(url=url, source=VIEWTEXT)
 
 	viewtext_url = "http://viewtext.org/api/text?url=%(url)s&format=json&rl=false" % {'url': urllib.quote(url)}
 	logging.debug("fetching: %s with viewtext extractor" % (viewtext_url,))
@@ -21,12 +22,7 @@ def extract(page):
 	logging.info("got JSON response with keys: %s" % (response.keys(),))
 
 	try:
-		#TODO: remove this hack once viewtext.org adds base href to links.
-		# Although, we should prbably still clean content - script tags and such..
-		body = response['content']
-		body = page_parser.get_body(page_parser.parse(body))
-
-		content.body = body
+		content.body = response['content']
 		content.title = response['title']
 	except KeyError, e:
 		raise deferred.PermanentTaskFailure("%s: %s" % (type(e), e))
