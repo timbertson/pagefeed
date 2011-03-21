@@ -72,7 +72,7 @@ def task_store_best_content(page_key, force=False):
 		best_content = max(contents_found)
 	except ValueError:
 		error("failed to save content for page %s - no contents were retrieved")
-		best_content = Content(url=page.content_url, title=page.default_title(), body="")
+		best_content = Content(url=page.content_url, title=page.default_title(), body=None)
 	try:
 		page.content = best_content.body
 		page.title = best_content.title
@@ -129,11 +129,11 @@ class Page(BaseModel):
 	def start_content_population(self):
 		self.pending = True
 		self.put()
+		deferred.defer(task_store_best_content, self.key(), force=True, _countdown = 60 * 10)
 		self.apply_transforms()
 		for extractor in CONTENT_EXTRACTORS:
 			info("queuing extractor %s for page %s" % (extractor,self.key()))
 			deferred.defer(task_extract_content, extractor, self.key())
-			deferred.defer(task_store_best_content, self.key(), force=True, _countdown = 60 * 5)
 
 	def apply_transforms(self):
 		try:
@@ -189,7 +189,7 @@ class Page(BaseModel):
 	def find_complete(cls, owner):
 		"returns only pages whose content has been fetched"
 		return filter(lambda p:p.content is not None, cls.find_all(owner))
-	
+
 	@classmethod
 	def find(cls, owner, url):
 		return db.Query(cls).filter('owner =', owner).filter('url =', url).get()
