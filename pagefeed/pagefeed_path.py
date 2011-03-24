@@ -9,3 +9,5 @@ add_load_path(os.path.abspath(os.path.dirname(__file__)))
 
 from google.appengine.dist import use_library
 use_library('django', '0.96')
+import warnings
+warnings.filterwarnings("ignore", category=UnicodeWarning, module='BeautifulSoup')

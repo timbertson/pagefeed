@@ -1,4 +1,5 @@
 import logging
+from pagefeed import pagefeed_path
 from google.appengine.ext import webapp
 from google.appengine.api import users
 
