@@ -20,10 +20,11 @@ class PageHandler(BaseHandler):
 			page.update(force=force)
 			if force:
 				new_page = page
-		if page.errors and not self.is_json():
-			self._render_error(page)
+		if page.errors:
+			if not self.is_json():
+				self._render_error(page)
 		else:
-			if success is not None:
+			if success and new_page:
 				success(new_page)
 		return new_page
 	

@@ -11,3 +11,4 @@ class ContentCronHandler(webapp.RequestHandler):
 		Content.purge()
 		logging.info("finished purging old content entries")
 		self.response.out.write("ok")
+

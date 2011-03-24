@@ -13,7 +13,7 @@ from transform import Transform, TransformError
 from base import BaseModel
 from content import Content
 from pagefeed.lib.page_parser import ascii
-import pagefeed_path
+from pagefeed import pagefeed_path
 
 
 MESSAGE_TYPES = ['error', 'info']
