@@ -1,4 +1,4 @@
-application: pagefeed
+application: pagefeed-hrd
 version: 2
 runtime: python
 api_version: 1
